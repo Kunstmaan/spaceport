@@ -20,24 +20,24 @@ script:
   - php box build
 deploy:
   matrix:
-  - provider: releases
-    skip_cleanup: true
-    api_key:
-      secure: xXlHUXKB34gHK8nMPF4lstD2AU+k5zYbbQJr2IBtJIx9/TUZ6FA94HKSTa0mQs5BVW2fZ+Ali9vKXUu/L68MjB2kd5T1qmTNwqj5WpE2FM4PHoU9XpwCc1YuB+eayg240mKX9mjszbZg3qchXgcZbeScwnGITa1jAJXv6fgXsCJZTX/fFV/2mAdQPPIIq0vuWjqL7ssNRfs7fMYmhm1vnvgI6m1XWX8sgHpogn0YvJy4WUTMRPCrH4DfaIXlbOThPonjE9K6/renKmCEzlgGBrKSEBu/ZPh3Skm0dQK7h/jRI3y3c6PgiqnVhyS0PNEAOnHzZFkjgfsx8oZp0Varg5+L0nt3ejLBKW2Ftlj7M3AgF+6Oj1DOPZQdANEGMlBGIqW+lIgb8xDnSH7pTL0xUL5L+TCWSPvt396Y1MHkWETH+wqWF2BRKGsbXXIppsatUAUPJvi6d82djbK3zJSICWSfZk/CzdbW8w+NzrY89XM8gycD0n9/mU7+WtN5jci/MtvuBx8N5RB3VzjVDzGm6SQcnxA1M2mnnI04SmxNe/WwgUIPXIQBwA4pd85fEovqR7uMQaL14HTgbeL5OGpvprO9xVBb6Qm/yTVUc7gMOfcfylECmTyu5Hlp0UDKjiwOY8S1WyF5T2WEnfFYGyF1nvcybOe0IF20Qjmv19eYCmM=
-    file: spaceport.phar
-    on:
-      repo: Kunstmaan/spaceport
-      php: 7.0
-      tags: true
-  - provider: s3
-    access_key_id:
-      secure: aS6iuqmlFqcKgm6WePIUMKao3+BZxoMZmdaO02xgyj01VI62p1P3FEnM7fVyQMVrwkcWN/6p2cCv8/e9ZWYzzFyvBBV1+Kk8Khtg+cF1pACGe2daGiv3FEV3GRKcNSi8V4ZGmRjcs2QiJf3oEXJ0wBbMIRUjip0/zGXMFZu2Du7ZQ2WdJOPhduAsJI307Goaef7qiGHShTO63Imf9J/sH0c1cqvAn6XR6FAXxaN8JtZsrd/qvFgucmUTIn417SY0kCJbXJg5/Ngyzz6yJf45exQ+AgVekIMEYHzTY6ugTv9lN/WH9ussKYwzeWZlGzbZlWzePcjZYvRN4ms53yMpsfF/MvabXy2Zz/zI/Ip7yib35+xduQnxFclLW16Wb8oKRXMMHmDnc3bfRVnfqqkKpr7zNEFeAWG/2cInu2tv6WuCd3THJBkZMAZtr4jXYN9PdlQxcOIKza7f/kyJmk7jOdzYBVo/AqGXfO3nDR2ZvLFwzMuzBVlu2L8Tqsyb7ayctJk5MOK4muofu+0bTXrblKwvRA2Vpmxf2IKZXJ7squxcMwFRKB4neUBafL4L7kcDNFnI9Q1FmXHsohAG2YKZccVwDKy58uYBHqG+a1PNl+G669Pk+UIkkiAHTh0CwhoFmIE9Nwj0MrRo5SmyLR7FnAt2d7OwJCAf13QiOSKVh/I=
-    secret_access_key:
-      secure: CgsWg5iW3K2u7hfvKSz1y3sJmxe8eL1BxBWfCVZHMJyb8udVtKhXXayeNIfW2JXGiAJHUZNg7kbCN2+YFtMP3ratG7MRNfWyV+ofBN9RwBc8MSxAaOMDA/Kp4RQcezDW/Lue84IrkirjJz/Zk86C/Y+d9RyHE+58JzAEYrKYeNhfYzguyHpA85lhBDzOqWDz2wTLvaqttiNniSWpobnaniDK9SvdkIU1tPS/JyVKFU8fMMrfxzitXUqNo+MxfqRs3wn4CFtUUhKiX6vgcaL+jgvvtPGEM+a0WKRsoy7Y5FxBCHMsAWpsDt+igtE91Y37Lx4PPRbOuVhBuDtXzR7DhCUjcedrniTlbyCM7zLTnHygcXyllbpmsWuoKiZDQvQRZfuyzvb+w9aMeRMvI0xDci+1WXL86zz5YrLRanhZfElPsxGHl95wFKqcWxEsiVI7cdJwtYxyhHioz0O2CNX0bTgt+BwGgXsBJ5k7tzct06HAjCDI8gqctw7phhRaZm6VB4tVoqEiKYGTYzGfrd+vT7b7hnKB+zvvlJLskw52RCpdRNbugEIDZHheEs36ljzYSGZVfb51aoAHPnoJx13Qu8NDBh38YLusUzdexo899wGnd1ATmnxjIB92yjvZCEUyKUqdJG5E5hqn4l94PX+eVTMvq9FAVV3c0BX0EsrQcIY=
-    bucket: kunstmaan-spaceport
-    skip_cleanup: true
-    acl: public_read
-    region: eu-west-1
-    on:
-      repo: Kunstmaan/spaceport
-      php: 7.0
+    - provider: releases
+      skip_cleanup: true
+      api_key:
+        secure: xXlHUXKB34gHK8nMPF4lstD2AU+k5zYbbQJr2IBtJIx9/TUZ6FA94HKSTa0mQs5BVW2fZ+Ali9vKXUu/L68MjB2kd5T1qmTNwqj5WpE2FM4PHoU9XpwCc1YuB+eayg240mKX9mjszbZg3qchXgcZbeScwnGITa1jAJXv6fgXsCJZTX/fFV/2mAdQPPIIq0vuWjqL7ssNRfs7fMYmhm1vnvgI6m1XWX8sgHpogn0YvJy4WUTMRPCrH4DfaIXlbOThPonjE9K6/renKmCEzlgGBrKSEBu/ZPh3Skm0dQK7h/jRI3y3c6PgiqnVhyS0PNEAOnHzZFkjgfsx8oZp0Varg5+L0nt3ejLBKW2Ftlj7M3AgF+6Oj1DOPZQdANEGMlBGIqW+lIgb8xDnSH7pTL0xUL5L+TCWSPvt396Y1MHkWETH+wqWF2BRKGsbXXIppsatUAUPJvi6d82djbK3zJSICWSfZk/CzdbW8w+NzrY89XM8gycD0n9/mU7+WtN5jci/MtvuBx8N5RB3VzjVDzGm6SQcnxA1M2mnnI04SmxNe/WwgUIPXIQBwA4pd85fEovqR7uMQaL14HTgbeL5OGpvprO9xVBb6Qm/yTVUc7gMOfcfylECmTyu5Hlp0UDKjiwOY8S1WyF5T2WEnfFYGyF1nvcybOe0IF20Qjmv19eYCmM=
+      file: spaceport.phar
+      on:
+        repo: Kunstmaan/spaceport
+        php: 7.0
+        tags: true
+    - provider: s3
+      access_key_id:
+        secure: aS6iuqmlFqcKgm6WePIUMKao3+BZxoMZmdaO02xgyj01VI62p1P3FEnM7fVyQMVrwkcWN/6p2cCv8/e9ZWYzzFyvBBV1+Kk8Khtg+cF1pACGe2daGiv3FEV3GRKcNSi8V4ZGmRjcs2QiJf3oEXJ0wBbMIRUjip0/zGXMFZu2Du7ZQ2WdJOPhduAsJI307Goaef7qiGHShTO63Imf9J/sH0c1cqvAn6XR6FAXxaN8JtZsrd/qvFgucmUTIn417SY0kCJbXJg5/Ngyzz6yJf45exQ+AgVekIMEYHzTY6ugTv9lN/WH9ussKYwzeWZlGzbZlWzePcjZYvRN4ms53yMpsfF/MvabXy2Zz/zI/Ip7yib35+xduQnxFclLW16Wb8oKRXMMHmDnc3bfRVnfqqkKpr7zNEFeAWG/2cInu2tv6WuCd3THJBkZMAZtr4jXYN9PdlQxcOIKza7f/kyJmk7jOdzYBVo/AqGXfO3nDR2ZvLFwzMuzBVlu2L8Tqsyb7ayctJk5MOK4muofu+0bTXrblKwvRA2Vpmxf2IKZXJ7squxcMwFRKB4neUBafL4L7kcDNFnI9Q1FmXHsohAG2YKZccVwDKy58uYBHqG+a1PNl+G669Pk+UIkkiAHTh0CwhoFmIE9Nwj0MrRo5SmyLR7FnAt2d7OwJCAf13QiOSKVh/I=
+      secret_access_key:
+        secure: CgsWg5iW3K2u7hfvKSz1y3sJmxe8eL1BxBWfCVZHMJyb8udVtKhXXayeNIfW2JXGiAJHUZNg7kbCN2+YFtMP3ratG7MRNfWyV+ofBN9RwBc8MSxAaOMDA/Kp4RQcezDW/Lue84IrkirjJz/Zk86C/Y+d9RyHE+58JzAEYrKYeNhfYzguyHpA85lhBDzOqWDz2wTLvaqttiNniSWpobnaniDK9SvdkIU1tPS/JyVKFU8fMMrfxzitXUqNo+MxfqRs3wn4CFtUUhKiX6vgcaL+jgvvtPGEM+a0WKRsoy7Y5FxBCHMsAWpsDt+igtE91Y37Lx4PPRbOuVhBuDtXzR7DhCUjcedrniTlbyCM7zLTnHygcXyllbpmsWuoKiZDQvQRZfuyzvb+w9aMeRMvI0xDci+1WXL86zz5YrLRanhZfElPsxGHl95wFKqcWxEsiVI7cdJwtYxyhHioz0O2CNX0bTgt+BwGgXsBJ5k7tzct06HAjCDI8gqctw7phhRaZm6VB4tVoqEiKYGTYzGfrd+vT7b7hnKB+zvvlJLskw52RCpdRNbugEIDZHheEs36ljzYSGZVfb51aoAHPnoJx13Qu8NDBh38YLusUzdexo899wGnd1ATmnxjIB92yjvZCEUyKUqdJG5E5hqn4l94PX+eVTMvq9FAVV3c0BX0EsrQcIY=
+      bucket: kunstmaan-spaceport
+      skip_cleanup: true
+      acl: public_read
+      region: eu-west-1
+      on:
+        repo: Kunstmaan/spaceport
+        php: 7.0
