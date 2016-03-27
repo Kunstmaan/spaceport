@@ -1,4 +1,5 @@
 language: php
+
 sudo: false
 
 cache:
@@ -19,9 +20,15 @@ before_install:
   - mv box.phar box
   - chmod 755 box
 
-install:
+script:
   - composer install
   - php box build
 
-script:
-  - phpunit
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: xXlHUXKB34gHK8nMPF4lstD2AU+k5zYbbQJr2IBtJIx9/TUZ6FA94HKSTa0mQs5BVW2fZ+Ali9vKXUu/L68MjB2kd5T1qmTNwqj5WpE2FM4PHoU9XpwCc1YuB+eayg240mKX9mjszbZg3qchXgcZbeScwnGITa1jAJXv6fgXsCJZTX/fFV/2mAdQPPIIq0vuWjqL7ssNRfs7fMYmhm1vnvgI6m1XWX8sgHpogn0YvJy4WUTMRPCrH4DfaIXlbOThPonjE9K6/renKmCEzlgGBrKSEBu/ZPh3Skm0dQK7h/jRI3y3c6PgiqnVhyS0PNEAOnHzZFkjgfsx8oZp0Varg5+L0nt3ejLBKW2Ftlj7M3AgF+6Oj1DOPZQdANEGMlBGIqW+lIgb8xDnSH7pTL0xUL5L+TCWSPvt396Y1MHkWETH+wqWF2BRKGsbXXIppsatUAUPJvi6d82djbK3zJSICWSfZk/CzdbW8w+NzrY89XM8gycD0n9/mU7+WtN5jci/MtvuBx8N5RB3VzjVDzGm6SQcnxA1M2mnnI04SmxNe/WwgUIPXIQBwA4pd85fEovqR7uMQaL14HTgbeL5OGpvprO9xVBb6Qm/yTVUc7gMOfcfylECmTyu5Hlp0UDKjiwOY8S1WyF5T2WEnfFYGyF1nvcybOe0IF20Qjmv19eYCmM=
+  file: spaceport.phar
+  on:
+    repo: Kunstmaan/spaceport
