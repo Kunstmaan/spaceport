@@ -15,7 +15,7 @@ class Application extends ConsoleApplication
     public function doRun(InputInterface $input, OutputInterface $output)
     {
 
-        $loader = new \Twig_Loader_Filesystem('./templates');
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/templates');
         $this->twig = new \Twig_Environment($loader);
 
         return parent::doRun($input, $output);
