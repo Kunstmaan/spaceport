@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+    app:
+        image: busybox
+        volumes:
+            - .:/app
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+            - ~/.composer:/root/.composer
+            - ./backup:/docker-entrypoint-initdb.d
+    apache:
+        image: kunstmaan/skylab-apache
+        links:
+            - php
+        volumes_from:
+            - app
+        environment:
+            VIRTUAL_HOST: {{ apache.vhost }}
+            VIRTUAL_PORT: {{ apache.port }}
+            DOCUMENT_ROOT: /app/{{ apache.webroot }}
+            FALLBACK_DOMAIN: {{ apache.fallbackdomain }}
+    php:
+        image: kunstmaan/skylab-php:{{ php.version }}
+        volumes_from:
+            - app
+        links:
+            - mysql
+            - elasticsearch
+        environment:
+            APP_ENV: docker
+    mysql:
+        image: kunstmaan/skylab-mysql:5.6
+        volumes_from:
+            - app
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_DATABASE: {{ mysal.database }}
+            MYSQL_USER: {{ mysal.user }}
+            MYSQL_PASSWORD: {{ mysal.password }}
+    elasticsearch:
+        image: elasticsearch:1

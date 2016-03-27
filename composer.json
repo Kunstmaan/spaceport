@@ -15,7 +15,8 @@
   "require": {
     "php": ">=5.5.9",
     "symfony/console": "^3.0",
-    "padraic/phar-updater": "^1.0"
+    "padraic/phar-updater": "^1.0",
+    "twig/twig": "^1.24"
   },
   "extra": {
     "branch-alias": {
