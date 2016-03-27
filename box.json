@@ -22,7 +22,7 @@
   "compression": "GZ",
   "git-version": "app_version",
   "main": "spaceport",
-  "output": "spaceport.phar",
+  "output": "out/spaceport.phar",
   "stub": true,
   "chmod": "0755"
 }
