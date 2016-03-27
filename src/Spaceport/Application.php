@@ -11,8 +11,8 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 class Application extends ConsoleApplication
 {
 
-    const VERSION_URL = 'https://spaceport.github.io/humbug/downloads/humbug.version';
-    const PHAR_URL = 'https://spaceport.github.io/humbug/downloads/humbug.phar';
+    const VERSION_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.version';
+    const PHAR_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.phar';
     const PACKAGE_NAME = 'kunstmaan/spaceport';
     const FILE_NAME = 'spaceport.phar';
 
