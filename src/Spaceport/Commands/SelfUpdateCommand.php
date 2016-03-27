@@ -15,8 +15,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class SelfUpdateCommand extends Command
 {
 
-    const VERSION_URL = 'https://spaceport.kunstmaan.be/kunstmaan-spaceport/spaceport.version';
-    const PHAR_URL = 'https://spaceport.kunstmaan.be/kunstmaan-spaceport/spaceport.phar';
+    const VERSION_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.version';
+    const PHAR_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.phar';
     const PACKAGE_NAME = 'kunstmaan/spaceport';
     const FILE_NAME = 'spaceport.phar';
 
@@ -285,11 +285,11 @@ class SelfUpdateCommand extends Command
 
         try {
             if ($updater->hasUpdate()) {
-                $this->io->success("The current $stability build available remotely is: " . $updater->getNewVersion());
+                $this->io->text("The current $stability build available remotely is: " . $updater->getNewVersion());
             } elseif (false == $updater->getNewVersion()) {
-                $this->io->warning("There are no $stability builds available.");
+                $this->io->text("There are no $stability builds available.");
             } else {
-                $this->io->success("You have the current $stability build installed.");
+                $this->io->text("You have the current $stability build installed.");
             }
         } catch (\Exception $e) {
             $this->io->error("Error: " . $e->getMessage());
