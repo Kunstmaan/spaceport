@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+if (PHP_VERSION_ID < 50400) {
+    file_put_contents('php://stderr', sprintf(
+        "Spaceport requires PHP 5.4 version or higher and your system has PHP %s version installed.\n\n",
+        PHP_VERSION
+    ));
+    exit(1);
+}
+
+require file_exists(__DIR__.'/vendor/autoload.php')
+    ? __DIR__.'/vendor/autoload.php'
+    : __DIR__.'/../../autoload.php';
+
+$appVersion = '1.0.0-DEV';
+
+// Windows uses Path instead of PATH
+if (!isset($_SERVER['PATH']) && isset($_SERVER['Path'])) {
+    $_SERVER['PATH'] = $_SERVER['Path'];
+}
+
+$app = new Spaceport\Application('Spaceport', $appVersion);
+$app->add(new Spaceport\Commands\SelfUpdateCommand());
+//$app->add(new Symfony\Installer\AboutCommand($appVersion));
+//$app->add(new Symfony\Installer\NewCommand());
+//$app->add(new Symfony\Installer\DemoCommand());
+//$app->add(new Symfony\Installer\SelfUpdateCommand());
+
+#$app->setDefaultCommand('about');
+
+$app->run();

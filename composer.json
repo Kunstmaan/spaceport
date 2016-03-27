@@ -1,0 +1,28 @@
+{
+  "name": "kunstmaan/spaceport",
+  "description": "Commandline tool to manage the Kunstmaan Docker development environment",
+  "keywords": ["kunstmaan", "docker", "cli", "php"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Roderik van der Veer",
+      "homepage": "http://labs.kunstmaan.be"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "Spaceport\\": "src/Spaceport/" }
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "symfony/console": "^3.0",
+    "padraic/phar-updater": "^1.0"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  },
+  "bin": [
+    "spaceport"
+  ]
+}
