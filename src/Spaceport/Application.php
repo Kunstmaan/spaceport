@@ -26,7 +26,7 @@ class Application extends ConsoleApplication
     public function wireTwig(OutputInterface $output)
     {
         $twig_loader = new \Twig_Loader_Chain(array(
-            new \Twig_Loader_Filesystem(BASE_DIR . '/templates'),
+            new \Twig_Loader_Filesystem(array(BASE_DIR . '/templates', './templates')),
             new \Twig_Loader_Array(array())
         ));
         $twig_options = array(
