@@ -18,6 +18,7 @@ class Application extends ConsoleApplication
 
     public function doRun(InputInterface $input, OutputInterface $output)
     {
+
         //$this->checkForUpdate();
 
 //        if ($this->isInPharMode() && in_array($commandName, array('new', 'demo'), true)) {
