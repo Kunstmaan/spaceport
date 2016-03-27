@@ -13,6 +13,8 @@ require __DIR__.'/vendor/autoload.php';
 
 $appVersion = '@app_version@';
 
+const BASE_DIR = __DIR__;
+
 // Windows uses Path instead of PATH
 if (!isset($_SERVER['PATH']) && isset($_SERVER['Path'])) {
     $_SERVER['PATH'] = $_SERVER['Path'];
