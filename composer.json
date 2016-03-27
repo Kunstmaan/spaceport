@@ -13,7 +13,7 @@
     "psr-4": { "Spaceport\\": "src/Spaceport/" }
   },
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=5.5.9",
     "symfony/console": "^3.0",
     "padraic/phar-updater": "^1.0"
   },

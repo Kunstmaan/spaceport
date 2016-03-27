@@ -6,7 +6,6 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\VersionParser;
-use Spaceport\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,6 +14,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class SelfUpdateCommand extends Command
 {
+
+    const VERSION_URL = 'https://spaceport.kunstmaan.be/kunstmaan-spaceport/spaceport.version';
+    const PHAR_URL = 'https://spaceport.kunstmaan.be/kunstmaan-spaceport/spaceport.phar';
+    const PACKAGE_NAME = 'kunstmaan/spaceport';
+    const FILE_NAME = 'spaceport.phar';
 
     /**
      * @var SymfonyStyle
@@ -162,8 +166,8 @@ class SelfUpdateCommand extends Command
     {
         /** @var GithubStrategy $strategyInterface */
         $strategyInterface = $updater->getStrategy();
-        $strategyInterface->setPackageName(Application::PACKAGE_NAME);
-        $strategyInterface->setPharName(Application::FILE_NAME);
+        $strategyInterface->setPackageName(self::PACKAGE_NAME);
+        $strategyInterface->setPharName(self::FILE_NAME);
         $strategyInterface->setCurrentLocalVersion($this->getApplication()->getVersion());
         return $updater;
     }
@@ -173,8 +177,8 @@ class SelfUpdateCommand extends Command
         $updater = new Updater(null, false);
         /** @var ShaStrategy $strategyInterface */
         $strategyInterface = $updater->getStrategy();
-        $strategyInterface->setPharUrl(Application::PHAR_URL);
-        $strategyInterface->setVersionUrl(Application::VERSION_URL);
+        $strategyInterface->setPharUrl(self::PHAR_URL);
+        $strategyInterface->setVersionUrl(self::VERSION_URL);
         return $updater;
     }
 
