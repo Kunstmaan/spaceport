@@ -19,7 +19,9 @@ if (!isset($_SERVER['PATH']) && isset($_SERVER['Path'])) {
 }
 
 $app = new Spaceport\Application('Spaceport', $appVersion);
-$app->add(new Spaceport\Commands\SelfUpdateCommand());
+if ('phar://' === substr(__DIR__, 0, 7)){
+    $app->add(new Spaceport\Commands\SelfUpdateCommand());
+}
 //$app->add(new Symfony\Installer\AboutCommand($appVersion));
 //$app->add(new Symfony\Installer\NewCommand());
 //$app->add(new Symfony\Installer\DemoCommand());
