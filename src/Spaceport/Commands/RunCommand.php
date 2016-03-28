@@ -35,7 +35,7 @@ class RunCommand extends Command
 
         /** @var \Twig_Environment $twig */
         $twig = $this->getApplication()->twig;
-        $template = $twig->loadTemplate('symfony/docker-compose.yml');
+        $template = $twig->loadTemplate(BASE_DIR . '/templates/symfony/docker-compose.yml');
         $dockercompose = $template->render(array('the' => 'variables', 'go' => 'here'));
         //file_put_contents('docker-compose.yml')
     }
