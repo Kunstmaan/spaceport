@@ -6,24 +6,17 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\VersionParser;
-use Symfony\Component\Console\Command\Command;
+use Spaceport\Traits\IOTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-class SelfUpdateCommand extends Command
+class SelfUpdateCommand extends AbstractCommand
 {
-
     const VERSION_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.version';
     const PHAR_URL = 'https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.phar';
     const PACKAGE_NAME = 'kunstmaan/spaceport';
     const FILE_NAME = 'spaceport.phar';
-
-    /**
-     * @var SymfonyStyle
-     */
-    protected $io;
 
     protected function configure()
     {
@@ -78,9 +71,8 @@ class SelfUpdateCommand extends Command
      * @param OutputInterface $output
      * @return void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $this->io = new SymfonyStyle($input, $output);
 
         $parser = new VersionParser();
 

@@ -34,8 +34,8 @@ services:
             - app
         environment:
             MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: {{ mysal.database }}
-            MYSQL_USER: {{ mysal.user }}
-            MYSQL_PASSWORD: {{ mysal.password }}
+            MYSQL_DATABASE: {{ mysql.database }}
+            MYSQL_USER: {{ mysql.user }}
+            MYSQL_PASSWORD: {{ mysql.password }}
     elasticsearch:
         image: elasticsearch:1

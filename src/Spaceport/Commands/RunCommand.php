@@ -1,24 +1,21 @@
 <?php
 namespace Spaceport\Commands;
 
-use Symfony\Component\Console\Command\Command;
+use Spaceport\Exceptions\NotASymfonyProjectException;
+use Spaceport\Traits\IOTrait;
+use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Yaml\Parser;
 
-class RunCommand extends Command
+class RunCommand extends AbstractCommand
 {
-
-    /**
-     * @var SymfonyStyle
-     */
-    protected $io;
 
     protected function configure()
     {
         $this
             ->setName('run')
-            ->setDescription('Update spaceport.phar to most recent stable, pre-release or development build.')
+            ->setDescription('Run the development environment')
         ;
     }
 
@@ -29,15 +26,33 @@ class RunCommand extends Command
      * @param OutputInterface $output
      * @return void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $this->io = new SymfonyStyle($input, $output);
+        $dockerComposeFileName = 'docker-compose.yml';
+        if (!file_exists($dockerComposeFileName)){
+            $mysql = $this->findMySQLSettings();
 
-        /** @var \Twig_Environment $twig */
-        $twig = $this->getApplication()->twig;
-        $template = $twig->loadTemplate(BASE_DIR . '/templates/symfony/docker-compose.yml');
-        $dockercompose = $template->render(array('the' => 'variables', 'go' => 'here'));
-        //file_put_contents('docker-compose.yml')
+            $this->twig->renderAndWriteTemplate('symfony/'.$dockerComposeFileName, $dockerComposeFileName);
+        }
+    }
+
+    /**
+     * @return array
+     * @throws NotASymfonyProjectException
+     */
+    private function findMySQLSettings(){
+        $parametersFile = 'app/config/parameters.yml';
+        if (file_exists($parametersFile)) {
+            $yaml = new Parser();
+            $value = $yaml->parse(file_get_contents($parametersFile));
+            $mysql = array();
+            $mysql['mysql.database'] = $value["parameters"]["database_name"];
+            $mysql['mysql.user'] = $value["parameters"]["database_user"];
+            $mysql['mysql.password'] = $value["parameters"]["database_password"];
+            return $mysql;
+        } else {
+            throw new NotASymfonyProjectException("No parameters.yml file found at " . $parametersFile);
+        }
     }
 
 }
