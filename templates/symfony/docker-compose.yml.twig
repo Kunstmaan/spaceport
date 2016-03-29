@@ -15,12 +15,12 @@ services:
         volumes_from:
             - app
         environment:
-            VIRTUAL_HOST: {{ apache.vhost }}
-            VIRTUAL_PORT: {{ apache.port }}
-            DOCUMENT_ROOT: /app/{{ apache.webroot }}
-            FALLBACK_DOMAIN: {{ apache.fallbackdomain }}
+            VIRTUAL_HOST: {{ apache_vhost }}
+            VIRTUAL_PORT: 80
+            DOCUMENT_ROOT: /app/{{ apache_webroot }}
+            FALLBACK_DOMAIN: {{ apache_fallbackdomain }}
     php:
-        image: kunstmaan/skylab-php:{{ php.version }}
+        image: kunstmaan/skylab-php:{{ php_version }}
         volumes_from:
             - app
         links:
@@ -34,8 +34,8 @@ services:
             - app
         environment:
             MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: {{ mysql.database }}
-            MYSQL_USER: {{ mysql.user }}
-            MYSQL_PASSWORD: {{ mysql.password }}
+            MYSQL_DATABASE: {{ mysql_database }}
+            MYSQL_USER: {{ mysql_user }}
+            MYSQL_PASSWORD: {{ mysql_password }}
     elasticsearch:
         image: elasticsearch:1
