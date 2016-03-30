@@ -7,6 +7,7 @@ use Spaceport\Traits\IOTrait;
 use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Parser;
 
 class RunCommand extends AbstractCommand
@@ -28,11 +29,26 @@ class RunCommand extends AbstractCommand
      */
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $this->writeDockerComposeFile();
+        $variables = $this->writeDockerComposeFile();
         $this->checkAppFile();
         $this->checkAppKernelFile();
         $this->writeConfigDockerFile();
+        $this->fetchDatabase($variables);
+        $this->runDocker();
         $this->io->newLine();
+    }
+
+    private function fetchDatabase(array $variables){
+        $this->io->text(' - Fetching the production databases');
+        $this->runCommand('rsync -avh ' . $variables['production_server'] . ':/home/projects/' . basename(getcwd()) . '/backup .');
+        $this->runCommand('ln -sf backup/mysql.dmp.gz backup/mysql.sql.gz');
+    }
+
+    private function runDocker(){
+        $this->io->text(' - Starting Docker');
+        $this->runCommand('docker-compose stop');
+        $this->runCommand('docker-compose pull');
+        $this->runCommand('docker-compose up -d');
     }
 
     private function writeConfigDockerFile()
@@ -42,7 +58,6 @@ class RunCommand extends AbstractCommand
         #if (!file_exists($configDockerFileName)) {
         $this->twig->renderAndWriteTemplate('symfony/config_docker.yml.twig', $configDockerFileName);
         #}
-
     }
 
     private function checkAppFile()
@@ -75,6 +90,9 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
     }
 
+    /**
+     * @return array
+     */
     private function writeDockerComposeFile()
     {
         $this->io->text(' - Generating the docker-compose.yml file');
@@ -83,6 +101,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $variables = array_merge($this->findMySQLSettings(), $this->findApacheSettings(), $this->findPHPSettings());
         $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, $variables);
         #}
+        return $variables;
     }
 
     private function findPHPSettings()
@@ -108,6 +127,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             $yaml = new Parser();
             $value = $yaml->parse(file_get_contents($jenkinsFile));
             $apache['apache_fallbackdomain'] = basename(getcwd()) . '.' . $value["deploy_matrix"]["production"]["server"];
+            $apache['production_server'] = $value["deploy_matrix"]["production"]["server"];
         } else {
             throw new NotAJenkinsBuiltProject("No jenkins.yml file found at " . $jenkinsFile);
         }
@@ -132,6 +152,16 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         } else {
             throw new NotASymfonyProjectException("No parameters.yml file found at " . $parametersFile);
         }
+    }
+
+    /**
+     * @param $command
+     */
+    private function runCommand($command)
+    {
+        $process = new Process($command);
+        $process->setTimeout(null);
+        $process->mustRun();
     }
 
 }
