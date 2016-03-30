@@ -47,7 +47,7 @@ class RunCommand extends AbstractCommand
     private function runDocker(){
         $this->io->text(' - Starting Docker');
         $this->runCommand('docker-compose stop');
-        $this->runCommand('docker-compose pull');
+        #$this->runCommand('docker-compose pull');
         $this->runCommand('docker-compose up -d');
     }
 
