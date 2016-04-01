@@ -3,8 +3,6 @@ namespace Spaceport\Commands;
 
 use Spaceport\Exceptions\NotAJenkinsBuiltProject;
 use Spaceport\Exceptions\NotASymfonyProjectException;
-use Spaceport\Traits\IOTrait;
-use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -38,31 +36,32 @@ class RunCommand extends AbstractCommand
         $this->io->newLine();
     }
 
+    /**
+     * @param array $variables
+     */
     private function fetchDatabase(array $variables){
-        $this->io->text(' - Fetching the production databases');
-        $this->runCommand('rsync -avh ' . $variables['production_server'] . ':/home/projects/' . basename(getcwd()) . '/backup .');
-        $this->runCommand('ln -sf backup/mysql.dmp.gz backup/mysql.sql.gz');
+        $this->logStep('Fetching the production databases');
+        $this->runCommand('rsync --no-acls -rLDhz --info=progress2 --delete --size-only ' . $variables['production_server'] . ':/home/projects/' . basename(getcwd()) . '/backup .', 60);
+        $this->runCommand('mv backup/mysql.dmp.gz backup/mysql.sql.gz', 60);
     }
 
     private function runDocker(){
-        $this->io->text(' - Starting Docker');
-        $this->runCommand('docker-compose stop');
-        #$this->runCommand('docker-compose pull');
+        $this->logStep('Starting Docker');
+        $this->runCommand('docker-compose down');
+        $this->runCommand('docker-compose pull');
         $this->runCommand('docker-compose up -d');
     }
 
     private function writeConfigDockerFile()
     {
-        $this->io->text(' - Generating the app/config/config_docker.yml file');
+        $this->logStep('Generating the app/config/config_docker.yml file');
         $configDockerFileName = 'app/config/config_docker.yml';
-        #if (!file_exists($configDockerFileName)) {
         $this->twig->renderAndWriteTemplate('symfony/config_docker.yml.twig', $configDockerFileName);
-        #}
     }
 
     private function checkAppFile()
     {
-        $this->io->text(' - Checking if the web/app.php file is setup for Docker');
+        $this->logStep('Checking if the web/app.php file is setup for Docker');
         if (strpos(file_get_contents("web/app.php"), 'docker') === false) {
             $this->io->block(
                 'The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
@@ -80,7 +79,7 @@ if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
 
     private function checkAppKernelFile()
     {
-        $this->io->text(' - Checking if the app/AppKernel.php file is setup for Docker');
+        $this->logStep('Checking if the app/AppKernel.php file is setup for Docker');
         if (strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
             $this->io->block(
                 'The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
@@ -95,19 +94,17 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
      */
     private function writeDockerComposeFile()
     {
-        $this->io->text(' - Generating the docker-compose.yml file');
+        $this->logStep('Generating the docker-compose.yml file');
         $dockerComposeFileName = 'docker-compose.yml';
-        #if (!file_exists($dockerComposeFileName)) {
         $variables = array_merge($this->findMySQLSettings(), $this->findApacheSettings(), $this->findPHPSettings());
         $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, $variables);
-        #}
         return $variables;
     }
 
     private function findPHPSettings()
     {
         $php = array();
-        $php['php_version'] = '7.0';
+        $php['php_version'] = $this->io->choice('What version of PHP do you need?', array('7.0','5.6','5.5','5.4'));;
         return $php;
     }
 
@@ -154,14 +151,18 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
     }
 
-    /**
-     * @param $command
-     */
-    private function runCommand($command)
+    private function runCommand($command, $timeout=null, $env=array())
     {
-        $process = new Process($command);
-        $process->setTimeout(null);
-        $process->mustRun();
+        $this->logCommand($command);
+        $env = array_replace($_ENV, $_SERVER, $env);
+        $process = new Process($command, null, $env);
+        $process->setTimeout($timeout);
+        $process->run(function ($type, $buffer) {
+            if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
+                strlen($type); // just to get rid of the scrutinizer error... sigh
+                echo $buffer;
+            }
+        });
     }
 
 }

@@ -16,6 +16,10 @@ abstract class AbstractCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output){
         $this->setUpIO($input, $output);
         $this->setUpTwig($output);
+
+        $this->showLogo();
+        $this->io->title("Executing " . get_class($this));
+
         $this->doExecute($input, $output);
     }
 

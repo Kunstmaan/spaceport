@@ -16,7 +16,7 @@ before_install:
   - mv box.phar box
   - chmod 755 box
 script:
-  - composer install
+  - composer install --optimize-autoloader
   - php box build
   - sha1sum out/spaceport.phar > out/spaceport.version
 deploy:

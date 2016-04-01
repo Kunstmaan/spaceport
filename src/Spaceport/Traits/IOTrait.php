@@ -10,13 +10,42 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 trait IOTrait
 {
 
+    protected $logo = '<fg=green;options=bold>
+ ███████╗██████╗  █████╗  ██████╗███████╗██████╗  ██████╗ ██████╗ ████████╗
+ ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+ ███████╗██████╔╝███████║██║     █████╗  ██████╔╝██║   ██║██████╔╝   ██║   
+ ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗   ██║   
+ ███████║██║     ██║  ██║╚██████╗███████╗██║     ╚██████╔╝██║  ██║   ██║   
+ ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+</fg=green;options=bold>
+';
+
     /**
      * @var SymfonyStyle
      */
     protected $io;
 
+    /** @var OutputInterface */
+    protected $output;
+
     public function setUpIO(InputInterface $input, OutputInterface $output){
         $this->io = new SymfonyStyle($input, $output);
+        $this->output = $output;
     }
 
+    public function logCommand($command){
+        if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+            $this->io->text('<fg=yellow>      $ ' . $command . '</>');
+        }
+    }
+
+    public function logStep($command){
+        if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
+            $this->io->text('<fg=blue> - ' . $command . '</>');
+        }
+    }
+
+    public function showLogo(){
+        $this->io->text($this->logo);
+    }
 }
