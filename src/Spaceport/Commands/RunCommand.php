@@ -31,9 +31,15 @@ class RunCommand extends AbstractCommand
         $this->checkAppFile();
         $this->checkAppKernelFile();
         $this->writeConfigDockerFile();
+        $this->generateCertificate();
         $this->fetchDatabase($variables);
         $this->runDocker();
         $this->io->newLine();
+    }
+
+    private function generateCertificate(){
+            $this->logStep('Generate selfsigned certificate');
+            $this->runCommand('openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ~/.dinghy/certs/'.basename(getcwd()).'.docker.key -out ~/.dinghy/certs/'.basename(getcwd()).'.docker.crt -subj "/C=BE/ST=Vlaams-Brabant/L=Leuven/O=Kunstmaan/OU=Smarties/CN='.basename(getcwd()).'.docker"');
     }
 
     /**
@@ -41,8 +47,8 @@ class RunCommand extends AbstractCommand
      */
     private function fetchDatabase(array $variables){
         $this->logStep('Fetching the production databases');
-        $this->runCommand('rsync --no-acls -rLDhz --info=progress2 --delete --size-only ' . $variables['production_server'] . ':/home/projects/' . basename(getcwd()) . '/backup .', 60);
-        $this->runCommand('mv backup/mysql.dmp.gz backup/mysql.sql.gz', 60);
+        $this->runCommand('rsync --no-acls -rLDhz --delete --size-only ' . $variables['production_server'] . ':/home/projects/' . $variables['project_name'] . '/backup/mysql.dmp.gz .skylab/backup/', 60);
+        $this->runCommand('mv .skylab/backup/mysql.dmp.gz .skylab/backup/mysql.sql.gz', 60);
     }
 
     private function runDocker(){
@@ -95,7 +101,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function writeDockerComposeFile()
     {
         $dockerComposeFileName = 'docker-compose.yml';
-        $variables = array_merge($this->findMySQLSettings(), $this->findApacheSettings(), $this->findPHPSettings());
+        $variables = array_merge($this->findMySQLSettings(), $this->findApacheSettings(), $this->findPHPSettings(!file_exists($dockerComposeFileName)));
         if (!file_exists($dockerComposeFileName)){
             $this->logStep('Generating the docker-compose.yml file');
             $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, $variables);
@@ -103,10 +109,13 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         return $variables;
     }
 
-    private function findPHPSettings()
+    private function findPHPSettings($ask=true)
     {
+
         $php = array();
-        $php['php_version'] = $this->io->choice('What version of PHP do you need?', array('7.0','5.6','5.5','5.4'));;
+        if ($ask){
+            $php['php_version'] = $this->io->choice('What version of PHP do you need?', array('7.0','5.6','5.5','5.4'));;
+        }
         return $php;
     }
 
@@ -125,8 +134,9 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         if (file_exists($jenkinsFile)) {
             $yaml = new Parser();
             $value = $yaml->parse(file_get_contents($jenkinsFile));
-            $apache['apache_fallbackdomain'] = basename(getcwd()) . '.' . $value["deploy_matrix"]["production"]["server"];
-            $apache['production_server'] = $value["deploy_matrix"]["production"]["server"];
+            $apache['apache_fallbackdomain'] = basename(getcwd()) . '.' . $value["deploy_matrix"][$value["database_source"]]["server"];
+            $apache['production_server'] = $value["deploy_matrix"][$value["database_source"]]["server"];
+            $apache['project_name'] = $value["deploy_matrix"][$value["database_source"]]["project"];
         } else {
             throw new NotAJenkinsBuiltProject("No jenkins.yml file found at " . $jenkinsFile);
         }
