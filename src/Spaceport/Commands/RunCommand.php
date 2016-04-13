@@ -138,6 +138,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function findMySQLSettings()
     {
         $parametersFile = 'app/config/parameters.yml';
+        $oldParametersFile = 'app/config/parameters.ini';
         if (file_exists($parametersFile)) {
             $yaml = new Parser();
             $value = $yaml->parse(file_get_contents($parametersFile));
@@ -146,8 +147,15 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             $mysql['mysql_user'] = $value["parameters"]["database_user"];
             $mysql['mysql_password'] = $value["parameters"]["database_password"];
             return $mysql;
+        } elseif (file_exists($oldParametersFile)) {
+            $ini = parse_ini_file($oldParametersFile, true);
+            $mysql = array();
+            $mysql['mysql_database'] = $ini["parameters"]["database_name"];
+            $mysql['mysql_user'] = $ini["parameters"]["database_user"];
+            $mysql['mysql_password'] = $ini["parameters"]["database_password"];
+            return $mysql;
         } else {
-            throw new NotASymfonyProjectException("No parameters.yml file found at " . $parametersFile);
+            throw new NotASymfonyProjectException("No parameters.yml or parameters.ini file found at " . $parametersFile);
         }
     }
 
