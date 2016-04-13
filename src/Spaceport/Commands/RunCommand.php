@@ -65,7 +65,7 @@ class RunCommand extends AbstractCommand
         if (strpos(file_get_contents("web/app.php"), 'docker') === false) {
             $this->io->block(
                 'The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
-                
+
 if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
     umask(0000);
     Debug::enable();
@@ -83,7 +83,7 @@ if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
         if (strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
             $this->io->block(
                 'The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
-                
+
 if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true)) {'
             );
         }
@@ -94,10 +94,12 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
      */
     private function writeDockerComposeFile()
     {
-        $this->logStep('Generating the docker-compose.yml file');
         $dockerComposeFileName = 'docker-compose.yml';
         $variables = array_merge($this->findMySQLSettings(), $this->findApacheSettings(), $this->findPHPSettings());
-        $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, $variables);
+        if (!file_exists($dockerComposeFileName)){
+            $this->logStep('Generating the docker-compose.yml file');
+            $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, $variables);
+        }
         return $variables;
     }
 
