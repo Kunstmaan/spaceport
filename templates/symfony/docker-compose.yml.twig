@@ -15,12 +15,16 @@ services:
         volumes_from:
             - app
         environment:
-            VIRTUAL_HOST: {{ apache_vhost }}
+            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
             VIRTUAL_PORT: 80
-            DOCUMENT_ROOT: /app/{{ apache_webroot }}
-            FALLBACK_DOMAIN: {{ apache_fallbackdomain }}
+            DOCUMENT_ROOT: /app/{{ shuttle.apacheWebroot }}
+            {%- if shuttle.apacheFallbackDomain %}
+
+            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
+            {%- endif %}
+
     php:
-        image: kunstmaan/skylab-php:{{ php_version }}
+        image: kunstmaan/skylab-php:{{ shuttle.phpVersion }}
         volumes_from:
             - app
         links:
@@ -32,10 +36,20 @@ services:
         image: kunstmaan/skylab-mysql:5.6
         volumes_from:
             - app
+        volumes:
+            - mysqldata:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: {{ mysql_database }}
-            MYSQL_USER: {{ mysql_user }}
-            MYSQL_PASSWORD: {{ mysql_password }}
+            MYSQL_DATABASE: {{ shuttle.mysqlDatabase }}
+            MYSQL_USER: {{ shuttle.mysqlUser }}
+            MYSQL_PASSWORD: {{ shuttle.mysqlPassword }}
     elasticsearch:
         image: elasticsearch:1
+    maildev:
+        image: djfarrelly/maildev
+        environment:
+            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
+            VIRTUAL_PORT: 1080
+
+volumes:
+    mysqldata: {}
