@@ -284,7 +284,7 @@ class Shuttle
      */
     public function setNodeVersion($nodeVersion)
     {
-        $this->nodeVersion = "node-$nodeVersion-alpine";
+        $this->nodeVersion = $nodeVersion;
 
         return $this;
     }
