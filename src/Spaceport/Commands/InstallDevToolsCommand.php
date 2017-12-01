@@ -26,11 +26,14 @@ class InstallDevToolsCommand extends AbstractCommand
 
         $output->writeln(sprintf('Writing our tools to directory: %s', realpath($installDir)));
         $command = sprintf("cp %s/* %s/", realpath($ourDir), realpath($installDir));
+        $chmod = sprintf("chmod +x %s/*", realpath($installDir));
 
         if (!is_writable($installDir)) {
             $command = 'sudo -s -p "Please enter your sudo password:" ' . $command;
+            $chmod = 'sudo -s -p "Please enter your sudo password:" ' . $chmod;
         }
 
         exec($command);
+        exec($chmod);
     }
 }
