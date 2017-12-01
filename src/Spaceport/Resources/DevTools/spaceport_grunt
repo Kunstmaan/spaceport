@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+docker-compose run --rm --no-deps node /run-as-user /usr/local/bin/grunt --allow-root $@

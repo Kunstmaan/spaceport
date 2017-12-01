@@ -51,6 +51,10 @@ services:
         environment:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }}
             VIRTUAL_PORT: 1080
+    node:
+        image: mkenney/npm:{{ shuttle.nodeVersion }}
+        volumes:
+            - .:/src
 
 volumes:
     mysqldata: {}

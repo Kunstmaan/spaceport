@@ -62,6 +62,11 @@ class Shuttle
     private $elasticsearchVersion;
 
     /**
+     * @var string
+     */
+    private $nodeVersion;
+
+    /**
      * @var bool
      */
     private $runSync;
@@ -263,5 +268,24 @@ class Shuttle
     public function setRunSync($runSync)
     {
         $this->runSync = $runSync;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNodeVersion()
+    {
+        return $this->nodeVersion;
+    }
+
+    /**
+     * @param string $nodeVersion
+     * @return $this
+     */
+    public function setNodeVersion($nodeVersion)
+    {
+        $this->nodeVersion = "node-$nodeVersion-alpine";
+
+        return $this;
     }
 }
