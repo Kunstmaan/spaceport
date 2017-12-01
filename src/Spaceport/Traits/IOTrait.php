@@ -45,6 +45,18 @@ trait IOTrait
         }
     }
 
+    public function logWarning($command){
+        if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
+            $this->io->warning($command);
+        }
+    }
+
+    public function logSuccess($command){
+        if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
+            $this->io->success($command);
+        }
+    }
+
     public function showLogo(){
         $this->io->text($this->logo);
     }
