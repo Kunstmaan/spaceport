@@ -57,6 +57,12 @@ trait IOTrait
         }
     }
 
+    public function logError($command){
+        if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
+            $this->io->error($command);
+        }
+    }
+
     public function showLogo(){
         $this->io->text($this->logo);
     }

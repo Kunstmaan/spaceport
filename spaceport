@@ -24,6 +24,7 @@ $app = new Spaceport\Application('Spaceport', $appVersion);
 if ('phar://' === substr(__DIR__, 0, 7)){
     $app->add(new Spaceport\Commands\SelfUpdateCommand());
 }
+$app->add(new Spaceport\Commands\InitCommand());
 $app->add(new Spaceport\Commands\RunCommand());
 $app->add(new \Spaceport\Commands\InstallDevToolsCommand());
 $app->add(new \Spaceport\Commands\SelfUpdateCommand());

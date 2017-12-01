@@ -6,9 +6,12 @@ use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 abstract class AbstractCommand extends Command
 {
+
+    CONST DOCKER_COMPOSE_FILE_NAME="docker-compose.yml";
 
     use TwigTrait;
     use IOTrait;
@@ -21,6 +24,20 @@ abstract class AbstractCommand extends Command
         $this->io->title("Executing " . get_class($this));
 
         $this->doExecute($input, $output);
+    }
+
+    protected function runCommand($command, $timeout = null, $env = [])
+    {
+        $this->logCommand($command);
+        $env = array_replace($_ENV, $_SERVER, $env);
+        $process = new Process($command, null, $env);
+        $process->setTimeout($timeout);
+        $process->run(function ($type, $buffer) {
+            if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
+                strlen($type); // just to get rid of the scrutinizer error... sigh
+                echo $buffer;
+            }
+        });
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
