@@ -57,6 +57,11 @@ class Shuttle
     private $phpVersion;
 
     /**
+     * @var string
+     */
+    private $elasticsearchVersion;
+
+    /**
      * @var bool
      */
     private $runSync;
@@ -223,6 +228,25 @@ class Shuttle
     public function setPhpVersion($phpVersion)
     {
         $this->phpVersion = $phpVersion;
+    }
+
+    /**
+     * @return string
+     */
+    public function getElasticsearchVersion()
+    {
+        return $this->elasticsearchVersion;
+    }
+
+    /**
+     * @param string $elasticsearchVersion
+     * @return Shuttle
+     */
+    public function setElasticsearchVersion($elasticsearchVersion)
+    {
+        $this->elasticsearchVersion = $elasticsearchVersion;
+
+        return $this;
     }
 
     /**

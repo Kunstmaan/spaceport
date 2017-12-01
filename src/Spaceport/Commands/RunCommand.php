@@ -114,6 +114,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $this->findMySQLSettings();
         $this->findApacheSettings();
         $this->findPHPSettings(!file_exists($dockerComposeFileName));
+        $this->askElasticVersion(!file_exists($dockerComposeFileName));
         if (!file_exists($dockerComposeFileName)){
             $this->logStep('Generating the docker-compose.yml file');
             $this->twig->renderAndWriteTemplate('symfony/' . $dockerComposeFileName . '.twig', $dockerComposeFileName, array('shuttle' => $this->shuttle));
@@ -124,9 +125,16 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     {
         $php = array();
         if ($ask){
-            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', array('7.0','5.6','5.5','5.4')));
+            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', ['7.2','7.1','7.0','5.6']));
         }
         return $php;
+    }
+
+    private function askElasticVersion($ask=true)
+    {
+        if ($ask){
+            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['2', '5']));
+        }
     }
 
 
