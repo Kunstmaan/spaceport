@@ -16,7 +16,7 @@ class TwigHelper
     public function __construct(OutputInterface $output)
     {
         $twig_loader = new \Twig_Loader_Chain(array(
-            new \Twig_Loader_Filesystem('/'),
+            new \Twig_Loader_Filesystem(BASE_DIR),
             new \Twig_Loader_Array(array())
         ));
         $twig_options = array(
@@ -33,7 +33,7 @@ class TwigHelper
      * @param array $variables
      */
     public function renderAndWriteTemplate($source, $target, array $variables = array()){
-        $template = $this->twig->loadTemplate(BASE_DIR . '/templates/'.$source);
+        $template = $this->twig->loadTemplate( 'templates/'.$source);
         $content = $template->render($variables);
         file_put_contents($target, $content);
     }
