@@ -62,7 +62,7 @@ class RunCommand extends AbstractCommand
     }
 
     private function runDocker(){
-        $this->logStep('Starting Docker (this can take a while ...)');
+        $this->logSuccess('Starting Docker (this can take a while ...)');
         $this->runCommand('docker-compose down');
         $this->runCommand('docker-compose pull');
         $this->runCommand('docker-compose up -d');
@@ -79,8 +79,7 @@ class RunCommand extends AbstractCommand
     {
         $this->logStep('Checking if the web/app.php file is setup for Docker');
         if (strpos(file_get_contents("web/app.php"), 'docker') === false) {
-            $this->io->block(
-                'The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
+            $this->logWarning('The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
 
 if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
     umask(0000);
@@ -97,8 +96,7 @@ if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
     {
         $this->logStep('Checking if the app/AppKernel.php file is setup for Docker');
         if (strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
-            $this->io->block(
-                'The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
+            $this->logWarning('The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
 
 if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true)) {'
             );
