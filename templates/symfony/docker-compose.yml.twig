@@ -52,7 +52,7 @@ services:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }}
             VIRTUAL_PORT: 1080
     node:
-        image: mkenney/npm:node-{{ shuttle.nodeVersion }}-alpine
+        image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
             - .:/src
 
