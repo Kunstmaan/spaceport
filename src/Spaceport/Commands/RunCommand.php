@@ -29,7 +29,7 @@ class RunCommand extends AbstractCommand
     {
         $this->logStep("Stopping containers");
         $this->runCommand('docker-compose down');
-        $this->logStep("Pulling required impages");
+        $this->logStep("Pulling required images");
         $this->runCommand('docker-compose pull');
         $this->logStep("Building required containers");
         $this->runCommand('docker-compose up -d');
