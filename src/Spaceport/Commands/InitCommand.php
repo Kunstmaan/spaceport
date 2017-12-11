@@ -180,13 +180,13 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             $this->shuttle->setMysqlDatabase($this->io->askQuestion($question));
         }
         if (array_key_exists('database_user', $parameters['parameters'])) {
-            $this->shuttle->setMysqlDatabase($parameters['parameters']['database_user']);
+            $this->shuttle->setMysqlUser($parameters['parameters']['database_user']);
         } else {
             $question = new Question('What is the database user?');
             $this->shuttle->setMysqlUser($this->io->askQuestion($question));
         }
         if (array_key_exists('database_password', $parameters['parameters'])) {
-            $this->shuttle->setMysqlDatabase($parameters['parameters']['database_password']);
+            $this->shuttle->setMysqlPassword($parameters['parameters']['database_password']);
         } else {
             $question = new Question('What is the database password?');
             $this->shuttle->setMysqlPassword($this->io->askQuestion($question));
