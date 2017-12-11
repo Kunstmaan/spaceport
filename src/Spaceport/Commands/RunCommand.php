@@ -18,7 +18,7 @@ class RunCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         if(!file_exists(parent::DOCKER_COMPOSE_FILE_NAME)) {
-            $this->logError("There is no docker-composer.yml file present. Run `spaceport run` first");
+            $this->logError("There is no docker-composer.yml file present. Run `spaceport init` first");
 
             return;
         }
