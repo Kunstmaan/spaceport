@@ -2,7 +2,6 @@
 
 namespace Spaceport\Commands;
 
-use Spaceport\Exceptions\NotAJenkinsBuiltProject;
 use Spaceport\Exceptions\NotASymfonyProjectException;
 use Spaceport\Model\Shuttle;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,7 +53,7 @@ class InitCommand extends AbstractCommand
     private function fetchDatabase()
     {
         if (!$this->shuttle->hasServer()) {
-            $this->logStep('Not Fetching databases because there is no .skylab/jenkins.yml present');
+            $this->logStep('Not Fetching databases because there is no server configured');
 
             return;
         }
@@ -139,10 +138,6 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
     }
 
-    /**
-     * @return array
-     * @throws NotAJenkinsBuiltProject
-     */
     private function findApacheSettings()
     {
         $jenkinsFile = '.skylab/jenkins.yml';
@@ -151,10 +146,21 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             $value = $yaml->parse(file_get_contents($jenkinsFile));
             $this->shuttle->setName($value["deploy_matrix"][$value["database_source"]]["project"]);
             $this->shuttle->setServer($value["deploy_matrix"][$value["database_source"]]["server"]);
-            $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
             $this->shuttle->setApacheFallbackDomain($this->shuttle->getName() . '.' . $this->shuttle->getServer());
             $this->shuttle->setRunSync($this->io->confirm('Should I fetch the database from your server?'));
+        } else {
+            $question = new Question('What is the name of the project?', $this->shuttle->getName());
+            $this->shuttle->setName($this->io->askQuestion($question));
+            if ($this->io->confirm('Do you have a server from which I should fetch the database ?', false)) {
+                $question = new Question('What is the name of the server?');
+                $this->shuttle->setServer($this->io->askQuestion($question));
+                $this->shuttle->setApacheFallbackDomain($this->shuttle->getName() . '.' . $this->shuttle->getServer());
+                $this->shuttle->setRunSync($this->io->confirm('Should I fetch the database from your server?'));
+            }
         }
+        $question = new Question('What is the Apache DocumentRoot?', $this->shuttle->getApacheDocumentRoot());
+        $this->shuttle->setApacheDocumentRoot($this->io->askQuestion($question));
+        $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
     }
 
     /**
