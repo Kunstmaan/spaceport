@@ -44,7 +44,7 @@ class RunCommand extends AbstractCommand
         $containerId = $this->runCommand('docker ps -a --filter="name=http-proxy" -q');
         if (empty($containerId)) {
             $this->logStep('Starting proxy');
-            $this->runCommand('docker run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be -e HTTPS_METHOD=noredirect --name http-proxy codekitchen/dinghy-http-proxy');
+            $this->runCommand('docker run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be --name http-proxy codekitchen/dinghy-http-proxy');
 
             return;
         }

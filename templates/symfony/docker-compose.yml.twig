@@ -19,6 +19,7 @@ services:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }}
             VIRTUAL_PORT: 80
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
+            HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
 
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
