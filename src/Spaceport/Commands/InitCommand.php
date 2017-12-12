@@ -196,6 +196,10 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function setDinghySSLCerts()
     {
         if ($this->io->confirm('Do you want to enable SSL for your Apache vhost ?', true)) {
+            //Check if dinghy dir exists
+            if (!file_exists("~/.dinghy/certs/")) {
+                $this->runCommand("mkdir -p ~/.dinghy/certs/");
+            }
             $sslFilesLocation = $this->getSSLFileLocation();
             if ($sslFilesLocation) {
                 //$command = 'sudo -s -p "Please enter your sudo password:" ' . $command;
