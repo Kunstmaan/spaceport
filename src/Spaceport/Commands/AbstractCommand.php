@@ -38,6 +38,13 @@ abstract class AbstractCommand extends Command
                 echo $buffer;
             }
         });
+        if (!$process->isSuccessful()) {
+            $this->logError($process->getErrorOutput());
+
+            return false;
+        }
+
+        return $process->getOutput();
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
