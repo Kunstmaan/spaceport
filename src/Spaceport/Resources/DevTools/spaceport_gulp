@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker-compose run --rm --no-deps node bundle install && /usr/local/bin/gulp --allow-root $@
+docker-compose run --rm --no-deps node /usr/local/bin/buildgulp $@
