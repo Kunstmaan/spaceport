@@ -44,7 +44,7 @@ class Shuttle
     /**
      * @var string
      */
-    private $apacheWebroot;
+    private $apacheDocumentRoot;
 
     /**
      * @var string|bool
@@ -71,14 +71,14 @@ class Shuttle
      */
     private $runSync;
     
-    const DOCKER_EXT = '.docker';
+    const DOCKER_EXT = '.dev.kunstmaan.be';
 
     public function __construct()
     {
         $this->name = basename(getcwd());
         $this->server = false;
         $this->apacheVhost = basename(getcwd()) . self::DOCKER_EXT;
-        $this->apacheWebroot = "web/";
+        $this->apacheDocumentRoot = "/app/web/";
         $this->apacheFallbackDomain = false;
         $this->runSync = false;
     }
@@ -190,17 +190,17 @@ class Shuttle
     /**
      * @return string
      */
-    public function getApacheWebroot()
+    public function getApacheDocumentRoot()
     {
-        return $this->apacheWebroot;
+        return $this->apacheDocumentRoot;
     }
 
     /**
-     * @param string $apacheWebroot
+     * @param string $apacheDocumentRoot
      */
-    public function setApacheWebroot($apacheWebroot)
+    public function setApacheDocumentRoot($apacheDocumentRoot)
     {
-        $this->apacheWebroot = $apacheWebroot;
+        $this->apacheDocumentRoot = $apacheDocumentRoot;
     }
 
     /**

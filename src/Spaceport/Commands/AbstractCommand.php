@@ -44,7 +44,7 @@ abstract class AbstractCommand extends Command
             return false;
         }
 
-        return $process->getOutput();
+        return trim($process->getOutput());
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);

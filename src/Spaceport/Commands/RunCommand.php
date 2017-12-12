@@ -34,6 +34,7 @@ class RunCommand extends AbstractCommand
         $this->logStep("Building required containers");
         $this->runCommand('docker-compose up -d');
         $this->startProxy();
+        $this->copyApacheConfig();
         $this->logSuccess('Docker is up and running');
     }
 
@@ -50,11 +51,26 @@ class RunCommand extends AbstractCommand
 
         //Check if http-proxy is running
         $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
-        if (trim($containerRunning) == 'false') {
+        if ($containerRunning == 'false') {
             $this->logStep("Starting proxy");
             $this->runCommand('docker start ' . $containerId);
         } else {
             $this->logStep("Proxy already running -- Skipping");
+        }
+    }
+
+    private function copyApacheConfig()
+    {
+        $apacheConfigFile = 'docker-apache.conf';
+        if (file_exists($apacheConfigFile)) {
+            $this->logStep("Docker Apache config find. Going to swap the default.");
+            $containerId = $this->runCommand('docker-compose ps -q apache');
+            if (!empty($containerId)) {
+                $this->logStep("Swapping default Apache config with docker-apache.conf file");
+                $this->runCommand('docker cp docker-apache.conf ' . $containerId . ":/etc/apache2/sites-available/000-default.conf");
+            } else {
+                $this->logWarning("No running Apache container found!.");
+            }
         }
     }
 }
