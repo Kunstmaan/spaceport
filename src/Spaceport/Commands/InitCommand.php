@@ -38,16 +38,10 @@ class InitCommand extends AbstractCommand
         $this->checkAppFile();
         $this->checkAppKernelFile();
         $this->writeConfigDockerFile();
-        $this->generateCertificate();
+        $this->setDinghySSLCerts();
         $this->fetchDatabase();
         $this->logSuccess("You can now run `spaceport run` to run the development environment");
         $this->io->newLine();
-    }
-
-    private function generateCertificate()
-    {
-        $this->logStep('Generate selfsigned certificate');
-        $this->runCommand('openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ~/.dinghy/certs/' . basename(getcwd()) . '.docker.key -out ~/.dinghy/certs/' . basename(getcwd()) . '.docker.crt -subj "/C=BE/ST=Vlaams-Brabant/L=Leuven/O=Kunstmaan/OU=Smarties/CN=' . basename(getcwd()) . '.docker"');
     }
 
     private function fetchDatabase()
@@ -197,5 +191,53 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             $question = new Question('What is the database password?');
             $this->shuttle->setMysqlPassword($this->io->askQuestion($question));
         }
+    }
+
+    private function setDinghySSLCerts()
+    {
+        if ($this->io->confirm('Do you want to enable SSL for your Apache vhost ?', true)) {
+            $sslFilesLocation = $this->getSSLFileLocation();
+            if ($sslFilesLocation) {
+                //$command = 'sudo -s -p "Please enter your sudo password:" ' . $command;
+                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.crt ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt");
+                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.key ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key");
+            }
+        }
+    }
+
+    private function getSSLFileLocation()
+    {
+        $question = new Question('What is the location of the SSL cert file and key file ? (Note: the dir should only contain 1 crt and 1 key file)', '/etc/ssl/docker_certs/');
+        $sslFilesLocation = $this->io->askQuestion($question);
+        if (!substr($sslFilesLocation, -1) == '/') {
+            $sslFilesLocation = $sslFilesLocation . '/';
+        }
+        if (!file_exists($sslFilesLocation)) {
+            $this->logError("The location " . $sslFilesLocation . " does not exist");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.crt")) == 0) {
+            $this->logError("There is no crt file available in the location " . $sslFilesLocation . ".");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.crt")) > 1) {
+            $this->logError("There are multiple crt files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.key")) == 0) {
+            $this->logError("There is no key file available in the location " . $sslFilesLocation . ".");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.key")) > 1) {
+            $this->logError("There are multiple key files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
+
+            return false;
+        }
+
+        return $sslFilesLocation;
     }
 }
