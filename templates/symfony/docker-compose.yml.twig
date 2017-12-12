@@ -33,6 +33,9 @@ services:
             - elasticsearch
         environment:
             APP_ENV: docker
+            XDEBUG: 'off'
+            XDEBUG_HOST: '10.254.254.254'
+
     mysql:
         image: kunstmaan/spaceport-mysql
         volumes_from:
