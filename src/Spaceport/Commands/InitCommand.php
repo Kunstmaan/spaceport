@@ -106,13 +106,15 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $this->askNodeVersion();
         $this->logStep('Generating the docker-compose.yml file');
         $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_DEV_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_DEV_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_SYNC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_SYNC_FILE_NAME, ['shuttle' => $this->shuttle]);
     }
 
     private function findPHPSettings($ask = true)
     {
         $php = [];
         if ($ask) {
-            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', ['7.2', '7.1', '7.0', '5.6']));
+            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', ['7.2', '7.1', '7.0', '5.6'], '7.2'));
         }
 
         return $php;
@@ -121,14 +123,14 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function askElasticVersion($ask = true)
     {
         if ($ask) {
-            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['2', '5']));
+            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['5', '2'], '5'));
         }
     }
 
     private function askNodeVersion($ask = true)
     {
         if ($ask) {
-            $this->shuttle->setNodeVersion($this->io->choice('What version of Node do you need?', ['6.9', '7', '8']));
+            $this->shuttle->setNodeVersion($this->io->choice('What version of Node do you need?', [ '8', '7', '6.9'], '8'));
         }
     }
 

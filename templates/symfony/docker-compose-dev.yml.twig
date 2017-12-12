@@ -1,0 +1,66 @@
+version: '2'
+
+services:
+    app:
+        image: busybox
+        volumes:
+            - {{ shuttle.name }}-app-sync:/app:rw
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+            - ~/.composer:/root/.composer
+            - ./backup:/docker-entrypoint-initdb.d
+    apache:
+        image: kunstmaan/spaceport-apache
+        links:
+            - php
+        volumes_from:
+            - app
+        hostname: {{ shuttle.apacheVhost }}
+        environment:
+            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
+            VIRTUAL_PORT: 80
+            DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
+            HTTPS_METHOD: noredirect
+            {%- if shuttle.apacheFallbackDomain %}
+
+            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
+            {%- endif %}
+
+    php:
+        image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
+        volumes_from:
+            - app
+        links:
+            - mysql
+            - elasticsearch
+        environment:
+            APP_ENV: docker
+            XDEBUG: 'off'
+            XDEBUG_HOST: '10.254.254.254'
+
+    mysql:
+        image: kunstmaan/spaceport-mysql
+        volumes_from:
+            - app
+        volumes:
+            - mysqldata:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_DATABASE: {{ shuttle.mysqlDatabase }}
+            MYSQL_USER: {{ shuttle.mysqlUser }}
+            MYSQL_PASSWORD: {{ shuttle.mysqlPassword }}
+    elasticsearch:
+        image: elasticsearch:{{ shuttle.elasticsearchVersion }}
+    maildev:
+        image: djfarrelly/maildev
+        environment:
+            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
+            VIRTUAL_PORT: 1080
+    node:
+        image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
+        volumes:
+            - {{ shuttle.name }}-app-sync:/src:rw
+
+volumes:
+    mysqldata: {}
+    {{ shuttle.name }}-app-sync:
+        external: true
