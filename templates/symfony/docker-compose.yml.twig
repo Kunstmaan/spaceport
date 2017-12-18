@@ -7,7 +7,6 @@ services:
             - .:/app
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
-            - ./backup:/docker-entrypoint-initdb.d
     apache:
         image: kunstmaan/spaceport-apache
         links:
