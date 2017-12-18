@@ -13,26 +13,31 @@ class RunCommand extends AbstractCommand
     {
         $this
             ->setName('run')
-            ->setDescription('Run the development environment');
+            ->setDescription('Run the development environment')
+            ->addOption('fresh-images', null, null, 'Pull new images from dockerhub.')
+        ;
     }
 
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+        $fresh = $input->getOption('fresh-images');
         if(!file_exists(parent::DOCKER_COMPOSE_FILE_NAME)) {
             $this->logError("There is no docker-composer.yml file present. Run `spaceport init` first");
 
             return;
         }
-        $this->runDocker();
+        $this->runDocker($fresh);
     }
 
-    private function runDocker()
+    private function runDocker($freshImages = false)
     {
         $this->logStep("Stopping containers");
         $this->runCommand('docker-compose down');
-        $this->logStep("Pulling required images");
-        $this->runCommand('docker-compose pull');
+        if ($freshImages) {
+            $this->logStep("Pulling required images");
+            $this->runCommand('docker-compose pull');
+        }
         $this->logStep("Building required containers");
         $this->startContainers();
         $this->startProxy();
