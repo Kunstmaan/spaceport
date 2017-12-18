@@ -159,10 +159,10 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         } else {
             $question = new Question('What is the name of the project?', $this->shuttle->getName());
             $this->shuttle->setName($this->io->askQuestion($question));
-            if ($this->io->confirm('Do you have a server from which I should fetch the database ?', false)) {
-                $question = new Question('What is the name of the server?');
+            if ($this->io->confirm('Is your project online available?', false)) {
+                $question = new Question('What is the domain name of your project?');
                 $this->shuttle->setServer($this->io->askQuestion($question));
-                $this->shuttle->setApacheFallbackDomain($this->shuttle->getName() . '.' . $this->shuttle->getServer());
+                $this->shuttle->setApacheFallbackDomain($this->shuttle->getServer());
                 $this->shuttle->setRunSync($this->io->confirm('Should I fetch the database from your server?'));
             }
         }
