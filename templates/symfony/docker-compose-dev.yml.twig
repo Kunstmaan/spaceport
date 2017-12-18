@@ -21,9 +21,11 @@ services:
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
             HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
+
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
             {%- endif %}
-    {{- 'php:' }}
+
+    php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes_from:
             - app
