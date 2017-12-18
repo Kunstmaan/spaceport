@@ -6,3 +6,4 @@ options:
 syncs:
     {{ shuttle.name }}-app-sync:
         src: './'
+        sync_excludes: ['.sass-cache/', 'sass/', 'sass-cache/', '.git/', 'var/cache/', 'app/cache', 'web/uploads/']
