@@ -61,7 +61,7 @@ services:
     node:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
-            - {{ shuttle.name }}-app-sync:/src:rw
+            - .:/src
 
 volumes:
     {% for database in shuttle.databases %}

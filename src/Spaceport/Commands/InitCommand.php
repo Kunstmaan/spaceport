@@ -61,12 +61,14 @@ class InitCommand extends AbstractCommand
                 sprintf(
             'rsync --no-acls -rLDhz --delete --size-only %s:/home/projects/%s/backup/mysql.dmp.gz ~/.spaceport/mysql/%s',
                     $this->shuttle->getServer(),
+                    $this->shuttle->getName(),
                     $this->shuttle->getName()
                 ), 60);
             $this->runCommand(
                 sprintf(
             'mv ~/.spaceport/mysql/%s/mysql.dmp.gz ~/.spaceport/mysql/%s/mysql.sql.gz',
-                    $this->shuttle->getServer()
+                    $this->shuttle->getName(),
+                    $this->shuttle->getName()
                 ), 60);
         }
     }
