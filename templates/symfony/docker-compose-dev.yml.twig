@@ -29,8 +29,8 @@ services:
         volumes_from:
             - app
         links:
-            {% for i in 1..shuttle.databases|length %}
-            {{- '- mysql_' ~ i }}
+            {% for database in shuttle.databases %}
+            {{- '- mysql_' ~ database.mysqlDatabase }}
             {% endfor %}
             {{- '- elasticsearch' }}
         environment:
@@ -44,6 +44,7 @@ services:
             - app
         volumes:
             - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
+            - {{ '~/.spaceport/mysql/' ~ database.mysqlDatabase }}:/docker-entrypoint-initdb.d
         environment:
             MYSQL_ROOT_PASSWORD: password
             MYSQL_DATABASE: {{ database.mysqlDatabase }}
@@ -64,7 +65,7 @@ services:
 
 volumes:
     {% for database in shuttle.databases %}
-    {{- 'mysqldata' ~ database.mysqlDatabase }}: {}
+    {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
     {% endfor %}
     {{- shuttle.name }}-app-sync:
         external: true
