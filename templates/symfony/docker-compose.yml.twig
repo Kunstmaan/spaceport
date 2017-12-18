@@ -21,23 +21,23 @@ services:
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
             HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
-
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
             {%- endif %}
-
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes_from:
             - app
         links:
-            - mysql
-            - elasticsearch
+            {% for i in 1..shuttle.databases|length %}
+            {{- '- mysql_' ~ i }}
+            {% endfor %}
+            {{- '- elasticsearch' }}
         environment:
             APP_ENV: docker
             XDEBUG: 'off'
             XDEBUG_HOST: '10.254.254.254'
-
-    mysql:
+    {% for database in shuttle.databases %}
+    {{- 'mysql_' ~ loop.index }}:
         image: kunstmaan/spaceport-mysql
         volumes_from:
             - app
@@ -45,10 +45,11 @@ services:
             - mysqldata:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: {{ shuttle.mysqlDatabase }}
-            MYSQL_USER: {{ shuttle.mysqlUser }}
-            MYSQL_PASSWORD: {{ shuttle.mysqlPassword }}
-    elasticsearch:
+            MYSQL_DATABASE: {{ database.mysqlDatabase }}
+            MYSQL_USER: {{ database.mysqlUser }}
+            MYSQL_PASSWORD: {{ database.mysqlPassword }}
+    {% endfor %}
+    {{- 'elasticsearch:' }}
         image: elasticsearch:{{ shuttle.elasticsearchVersion }}
     maildev:
         image: djfarrelly/maildev

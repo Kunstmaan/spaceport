@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: Ruud Denivel <ruud.denivel@kunstmaan.be>
- * Date: 24/04/16
- * Time: 10:40
- */
-
 namespace Spaceport\Model;
 
 class Shuttle
@@ -17,24 +10,9 @@ class Shuttle
     private $name;
 
     /**
-     * @var string|bool
-     */
-    private $server = false;
-
-    /**
      * @var string
      */
-    private $mysqlDatabase;
-
-    /**
-     * @var string
-     */
-    private $mysqlUser;
-
-    /**
-     * @var string
-     */
-    private $mysqlPassword;
+    private $server;
 
     /**
      * @var string
@@ -42,12 +20,17 @@ class Shuttle
     private $apacheVhost;
 
     /**
+     * @var DatabaseConnection[]
+     */
+    private $databases;
+
+    /**
      * @var string
      */
     private $apacheDocumentRoot;
 
     /**
-     * @var string|bool
+     * @var string
      */
     private $apacheFallbackDomain;
 
@@ -76,11 +59,10 @@ class Shuttle
     public function __construct()
     {
         $this->name = basename(getcwd());
-        $this->server = false;
         $this->apacheVhost = basename(getcwd()) . self::DOCKER_EXT;
         $this->apacheDocumentRoot = "/app/web/";
-        $this->apacheFallbackDomain = false;
         $this->runSync = false;
+        $this->databases = [];
     }
     
     /**
@@ -100,11 +82,11 @@ class Shuttle
     }
 
     /**
-     * @return bool|string
+     * @return string
      */
     public function getServer()
     {
-        return $this->server;
+        return null !== $this->server ? $this->server : '';
     }
 
     /**
@@ -120,55 +102,7 @@ class Shuttle
      */
     public function hasServer()
     {
-        return $this->server !== false;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMysqlDatabase()
-    {
-        return $this->mysqlDatabase;
-    }
-
-    /**
-     * @param string $mysqlDatabase
-     */
-    public function setMysqlDatabase($mysqlDatabase)
-    {
-        $this->mysqlDatabase = $mysqlDatabase;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMysqlUser()
-    {
-        return $this->mysqlUser;
-    }
-
-    /**
-     * @param string $mysqlUser
-     */
-    public function setMysqlUser($mysqlUser)
-    {
-        $this->mysqlUser = $mysqlUser;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMysqlPassword()
-    {
-        return $this->mysqlPassword;
-    }
-
-    /**
-     * @param string $mysqlPassword
-     */
-    public function setMysqlPassword($mysqlPassword)
-    {
-        $this->mysqlPassword = $mysqlPassword;
+        return null !== $this->server;
     }
 
     /**
@@ -287,5 +221,45 @@ class Shuttle
         $this->nodeVersion = $nodeVersion;
 
         return $this;
+    }
+
+    /**
+     * @return DatabaseConnection[]
+     */
+    public function getDatabases()
+    {
+        return $this->databases;
+    }
+
+    /**
+     * @param DatabaseConnection[] $databases
+     * @return $this
+     */
+    public function setDatabases($databases)
+    {
+        $this->databases = $databases;
+
+        return $this;
+    }
+
+
+    /**
+     * @param DatabaseConnection $connection
+     */
+    public function addDatabaseConnection(DatabaseConnection $connection)
+    {
+       if(null !== $connection) {
+           $this->databases[] = $connection;
+       }
+    }
+
+    /**
+     * @param DatabaseConnection $connection
+     */
+    public function removeDatabaseConnection(DatabaseConnection $connection)
+    {
+        if($index = array_search($connection, $this->databases, true)) {
+            array_splice($this->databases, $index, 1);
+        }
     }
 }
