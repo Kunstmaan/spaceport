@@ -4,6 +4,7 @@ namespace Spaceport\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class RunCommand extends AbstractCommand
 {
@@ -32,10 +33,31 @@ class RunCommand extends AbstractCommand
         $this->logStep("Pulling required images");
         $this->runCommand('docker-compose pull');
         $this->logStep("Building required containers");
-        $this->runCommand('docker-compose up -d');
+        $this->startContainers();
         $this->startProxy();
         $this->copyApacheConfig();
         $this->logSuccess('Docker is up and running');
+    }
+
+    private function startContainers()
+    {
+        $serverInfo = php_uname('s');
+        if (strpos($serverInfo, 'Darwin') !== false && file_exists('docker-compose-dev.yml')) {
+            $config = Yaml::parse(file_get_contents('docker-compose-dev.yml'));
+            if (isset($config['volumes'])) {
+                foreach ($config['volumes'] as $volume => $data) {
+                    if (!empty($data) && isset($data['external']) && $data['external'] == true) {
+                        $this->runCommand("docker volume create --name=$volume");
+                    }
+                }
+            }
+
+            $this->runCommand('docker-compose -f docker-compose-dev.yml up -d');
+            $this->runCommand('docker-sync start');
+
+        } else {
+            $this->runCommand('docker-compose up -d');
+        }
     }
 
     private function startProxy()
