@@ -3,6 +3,7 @@
 namespace Spaceport\Commands;
 
 use Spaceport\Exceptions\NotASymfonyProjectException;
+use Spaceport\Model\DatabaseConnection;
 use Spaceport\Model\Shuttle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -54,8 +55,18 @@ class InitCommand extends AbstractCommand
 
         if ($this->shuttle->shouldRunSync()) {
             $this->logStep('Fetching the production databases');
-            $this->runCommand('rsync --no-acls -rLDhz --delete --size-only ' . $this->shuttle->getServer() . ':/home/projects/' . $this->shuttle->getName() . '/backup/mysql.dmp.gz .skylab/backup/', 60);
-            $this->runCommand('mv .skylab/backup/mysql.dmp.gz .skylab/backup/mysql.sql.gz', 60);
+            $this->runCommand(sprintf('mkdir -p ~/docker_mysql/%s', $this->shuttle->getName()));
+            $this->runCommand(
+                sprintf(
+            'rsync --no-acls -rLDhz --delete --size-only %s:/home/projects/%s/backup/mysql.dmp.gz ~/docker_mysql/%s',
+                    $this->shuttle->getServer(),
+                    $this->shuttle->getName()
+                ), 60);
+            $this->runCommand(
+                sprintf(
+            'mv ~/docker_mysql/%s/mysql.dmp.gz ~/docker_mysql/%s/mysql.sql.gz',
+                    $this->shuttle->getServer()
+                ), 60);
         }
     }
 
@@ -130,7 +141,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function askNodeVersion($ask = true)
     {
         if ($ask) {
-            $this->shuttle->setNodeVersion($this->io->choice('What version of Node do you need?', [ '8', '7', '6.9'], '8'));
+            $this->shuttle->setNodeVersion($this->io->choice('What version of Node do you need?', ['8', '7', '6.9'], '8'));
         }
     }
 
@@ -175,23 +186,40 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             throw new NotASymfonyProjectException("No parameters.yml or parameters.ini file found at " . $parametersFile);
         }
 
-        if (array_key_exists('database_name', $parameters['parameters'])) {
-            $this->shuttle->setMysqlDatabase($parameters['parameters']['database_name']);
+        if (
+            !array_key_exists('database_name', $parameters['parameters']) &&
+            !array_key_exists('database_user', $parameters['parameters']) &&
+            !array_key_exists('database_password', $parameters['parameters'])) {
+            $question = new Question('How many databases do you want to configure?', 1);
+            $question->setValidator(function ($answer) {
+                if (!is_numeric($answer)) {
+                    throw new \RuntimeException(
+                        'The answer should be a number.'
+                    );
+                }
+
+                return $answer;
+            });
+            $loops = $this->io->askQuestion($question);
+
+            for ($i = 0; $i < $loops; $i++) {
+                $this->io->writeln(sprintf('Configuring database %d:', $i+1));
+                $databaseConnection = new DatabaseConnection();
+                $question = new Question('What is the database name?');
+                $databaseConnection->setMysqlDatabase($this->io->askQuestion($question));
+                $question = new Question('What is the database user?');
+                $databaseConnection->setMysqlUser($this->io->askQuestion($question));
+                $question = new Question('What is the database password?');
+                $databaseConnection->setMysqlPassword($this->io->askQuestion($question));
+
+                $this->shuttle->addDatabaseConnection($databaseConnection);
+            }
         } else {
-            $question = new Question('What is the database name?');
-            $this->shuttle->setMysqlDatabase($this->io->askQuestion($question));
-        }
-        if (array_key_exists('database_user', $parameters['parameters'])) {
-            $this->shuttle->setMysqlUser($parameters['parameters']['database_user']);
-        } else {
-            $question = new Question('What is the database user?');
-            $this->shuttle->setMysqlUser($this->io->askQuestion($question));
-        }
-        if (array_key_exists('database_password', $parameters['parameters'])) {
-            $this->shuttle->setMysqlPassword($parameters['parameters']['database_password']);
-        } else {
-            $question = new Question('What is the database password?');
-            $this->shuttle->setMysqlPassword($this->io->askQuestion($question));
+            $databaseConnection = new DatabaseConnection();
+            $databaseConnection->setMysqlDatabase($parameters['parameters']['database_name']);
+            $databaseConnection->setMysqlUser($parameters['parameters']['database_user']);
+            $databaseConnection->setMysqlPassword($parameters['parameters']['database_password']);
+            $this->shuttle->addDatabaseConnection($databaseConnection);
         }
     }
 
