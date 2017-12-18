@@ -39,12 +39,12 @@ services:
             XDEBUG: 'off'
             XDEBUG_HOST: '10.254.254.254'
     {% for database in shuttle.databases %}
-    {{- 'mysql_' ~ loop.index }}:
+    {{- 'mysql_' ~ database.mysqlDatabase }}:
         image: kunstmaan/spaceport-mysql
         volumes_from:
             - app
         volumes:
-            - mysqldata:/var/lib/mysql
+            - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: password
             MYSQL_DATABASE: {{ database.mysqlDatabase }}
@@ -64,6 +64,8 @@ services:
             - {{ shuttle.name }}-app-sync:/src:rw
 
 volumes:
-    mysqldata: {}
-    {{ shuttle.name }}-app-sync:
+    {% for database in shuttle.databases %}
+    {{- 'mysqldata' ~ database.mysqlDatabase }}: {}
+    {% endfor %}
+    {{- shuttle.name }}-app-sync:
         external: true
