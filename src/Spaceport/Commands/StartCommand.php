@@ -6,14 +6,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
-class RunCommand extends AbstractCommand
+class StartCommand extends AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('run')
-            ->setDescription('Run the development environment')
+            ->setName('start')
+            ->setDescription('Start the development environment')
             ->addOption('clean', null, null, 'Start with clean containers')
             ->addOption('fresh-images', null, null, 'Pull new images from dockerhub.')
         ;
