@@ -27,7 +27,7 @@ class InstallDevToolsCommand extends AbstractCommand
         $output->writeln(sprintf('Writing our tools to directory: %s', realpath($installDir)));
         $command = sprintf("cp %s/* %s/", realpath($ourDir), realpath($installDir));
         $toolsFiles = preg_grep('/^spaceport/', scandir($ourDir));
-        $chmod = sprintf("chmod +x %s && cd -", implode(' ', $toolsFiles));
+        $chmod = sprintf("chmod +x %s", implode(' ', $toolsFiles));
         chdir(realpath($installDir));
 
         if (!is_writable($installDir)) {
