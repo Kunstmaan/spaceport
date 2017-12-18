@@ -21,7 +21,7 @@ class StopCommand extends AbstractCommand
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
         if(!file_exists(parent::DOCKER_COMPOSE_FILE_NAME)) {
-            $this->logError("There is no docker-composer.yml file present. Run `spaceport init` first");
+            $this->logError("There is no docker-compose.yml file present. Run `spaceport init` first");
 
             return;
         }
