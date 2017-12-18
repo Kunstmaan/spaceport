@@ -47,6 +47,8 @@ class InitCommand extends AbstractCommand
 
     private function fetchDatabase()
     {
+        //Always create the .spaceport/mysql dir
+        $this->runCommand(sprintf('mkdir -p ~/.spaceport/mysql/%s', $this->shuttle->getName()));
         if (!$this->shuttle->hasServer()) {
             $this->logStep('Not Fetching databases because there is no server configured');
 
@@ -55,16 +57,15 @@ class InitCommand extends AbstractCommand
 
         if ($this->shuttle->shouldRunSync()) {
             $this->logStep('Fetching the production databases');
-            $this->runCommand(sprintf('mkdir -p ~/docker_mysql/%s', $this->shuttle->getName()));
             $this->runCommand(
                 sprintf(
-            'rsync --no-acls -rLDhz --delete --size-only %s:/home/projects/%s/backup/mysql.dmp.gz ~/docker_mysql/%s',
+            'rsync --no-acls -rLDhz --delete --size-only %s:/home/projects/%s/backup/mysql.dmp.gz ~/.spaceport/mysql/%s',
                     $this->shuttle->getServer(),
                     $this->shuttle->getName()
                 ), 60);
             $this->runCommand(
                 sprintf(
-            'mv ~/docker_mysql/%s/mysql.dmp.gz ~/docker_mysql/%s/mysql.sql.gz',
+            'mv ~/.spaceport/mysql/%s/mysql.dmp.gz ~/.spaceport/mysql/%s/mysql.sql.gz',
                     $this->shuttle->getServer()
                 ), 60);
         }
