@@ -3,7 +3,21 @@ imports:
 
 doctrine:
     dbal:
-        host:     "mysql"
+        {%- if shuttle.databases|length == 1 %}
+
+        host: "mysql_{{ shuttle.databases[0].mysqlDatabase }}"
+
+        {%- else %}
+
+        connections:
+            {%- for database in shuttle.databases %}
+
+            connection_{{ database.mysqlDatabase }}:
+                host: mysql_{{ database.mysqlDatabase }}
+
+            {%- endfor %}
+        {%- endif %}
+
 
 parameters:
-  kunstmaan_search.hostname: "elasticsearch"
+    kunstmaan_search.hostname: "elasticsearch"
