@@ -53,6 +53,9 @@ services:
     {% endfor %}
     {{- 'elasticsearch:' }}
         image: elasticsearch:{{ shuttle.elasticsearchVersion }}
+        ports:
+            - "9200:9200"
+            - "9300:9300"
 		volumes:
 			- /usr/local/etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
 		environment:
