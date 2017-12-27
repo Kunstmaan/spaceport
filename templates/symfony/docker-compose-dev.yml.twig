@@ -62,6 +62,8 @@ services:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     maildev:
         image: djfarrelly/maildev
+        ports:
+            - "1080:80"
         environment:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }}
             VIRTUAL_PORT: 1080
