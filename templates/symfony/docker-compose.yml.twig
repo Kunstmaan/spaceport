@@ -56,10 +56,10 @@ services:
         ports:
             - "9200:9200"
             - "9300:9300"
-		volumes:
-			- /usr/local/etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-		environment:
-			ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+        volumes:
+            - /usr/local/etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+        environment:
+            ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     maildev:
         image: djfarrelly/maildev
         environment:
