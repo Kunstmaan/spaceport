@@ -77,7 +77,7 @@ class InitCommand extends AbstractCommand
     {
         $this->logStep('Generating the app/config/config_docker.yml file');
         $configDockerFileName = 'app/config/config_docker.yml';
-        $this->twig->renderAndWriteTemplate('symfony/config_docker.yml.twig', $configDockerFileName);
+        $this->twig->renderAndWriteTemplate('symfony/config_docker.yml.twig', $configDockerFileName, ['shuttle' => $this->shuttle]);
     }
 
     private function checkAppFile()
