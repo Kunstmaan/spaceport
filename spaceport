@@ -29,6 +29,12 @@ $app->add(new Spaceport\Commands\StartCommand());
 $app->add(new Spaceport\Commands\StopCommand());
 $app->add(new Spaceport\Commands\InstallDevToolsCommand());
 $app->add(new Spaceport\Commands\DatabaseCommand());
+$app->add(new Spaceport\Commands\NpmCommand());
+$app->add(new Spaceport\Commands\GulpCommand());
+$app->add(new Spaceport\Commands\GruntCommand());
+$app->add(new Spaceport\Commands\BowerCommand());
+$app->add(new Spaceport\Commands\CleanCommand());
+$app->add(new Spaceport\Commands\PhpCommand());
 $app->add(new Spaceport\Commands\SelfUpdateCommand());
 
 $app->run();
