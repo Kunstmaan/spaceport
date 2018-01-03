@@ -4,8 +4,9 @@ namespace Spaceport\Commands;
 
 use Spaceport\Exceptions\NotASymfonyProjectException;
 use Spaceport\Model\DatabaseConnection;
-use Spaceport\Model\Shuttle;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Yaml\Parser;
@@ -13,16 +14,12 @@ use Symfony\Component\Yaml\Parser;
 class InitCommand extends AbstractCommand
 {
 
-    /**
-     * @var Shuttle
-     */
-    private $shuttle;
-
     protected function configure()
     {
         $this
             ->setName('init')
-            ->setDescription('Initialize the project to run with docker');
+            ->setDescription('Initialize the project to run with docker')
+            ->addOption('force', null, InputOption::VALUE_OPTIONAL, 'Force the regeneration of the docker files');
     }
 
     /**
@@ -34,43 +31,26 @@ class InitCommand extends AbstractCommand
      */
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $this->shuttle = new Shuttle();
-        $this->writeDockerComposeFile();
+        if (!$this->isDockerized(true) || $input->getOption('force')) {
+            $this->writeDockerComposeFile();
+            $this->writeConfigDockerFile();
+        }
         $this->checkAppFile();
         $this->checkAppKernelFile();
-        $this->writeConfigDockerFile();
         $this->setDinghySSLCerts();
-        $this->fetchDatabase();
+        $this->fetchDatabase($output);
         $this->logSuccess("You can now run `spaceport start` to run the development environment");
         $this->io->newLine();
     }
 
-    private function fetchDatabase()
+    private function fetchDatabase(OutputInterface $output)
     {
-        //Always create the .spaceport/mysql dir
-        $this->runCommand(sprintf('mkdir -p ~/.spaceport/mysql/%s', $this->shuttle->getName()));
-        if (!$this->shuttle->hasServer()) {
-            $this->logStep('Not Fetching databases because there is no server configured');
+        $command = $this->getApplication()->find("db");
 
-            return;
-        }
+        $arguments = ['command' => 'db', '--sync' => true];
 
-        if ($this->shuttle->shouldRunSync()) {
-            $this->logStep('Fetching the production databases');
-            $this->runCommand(
-                sprintf(
-            'rsync --no-acls -rLDhz --delete --size-only %s:/home/projects/%s/backup/mysql.dmp.gz ~/.spaceport/mysql/%s',
-                    $this->shuttle->getServer(),
-                    $this->shuttle->getName(),
-                    $this->shuttle->getName()
-                ), 60);
-            $this->runCommand(
-                sprintf(
-            'mv ~/.spaceport/mysql/%s/mysql.dmp.gz ~/.spaceport/mysql/%s/mysql.sql.gz',
-                    $this->shuttle->getName(),
-                    $this->shuttle->getName()
-                ), 60);
-        }
+        $dbInput = new ArrayInput($arguments);
+        $command->run($dbInput, $output);
     }
 
     private function writeConfigDockerFile()
@@ -108,9 +88,6 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
     }
 
-    /**
-     * @return array
-     */
     private function writeDockerComposeFile()
     {
         $this->findMySQLSettings();
@@ -235,7 +212,6 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
             }
             $sslFilesLocation = $this->getSSLFileLocation();
             if ($sslFilesLocation) {
-                //$command = 'sudo -s -p "Please enter your sudo password:" ' . $command;
                 $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.crt ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt");
                 $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.key ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key");
             }

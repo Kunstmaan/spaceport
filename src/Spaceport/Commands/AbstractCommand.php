@@ -1,6 +1,7 @@
 <?php
 namespace Spaceport\Commands;
 
+use Spaceport\Model\Shuttle;
 use Spaceport\Traits\IOTrait;
 use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Command\Command;
@@ -18,6 +19,11 @@ abstract class AbstractCommand extends Command
     use TwigTrait;
     use IOTrait;
 
+    /**
+     * @var Shuttle
+     */
+    protected $shuttle;
+
     protected function execute(InputInterface $input, OutputInterface $output){
         $this->setUpIO($input, $output);
         $this->setUpTwig($output);
@@ -25,10 +31,12 @@ abstract class AbstractCommand extends Command
         $this->showLogo();
         $this->io->title("Executing " . get_class($this));
 
+        $this->shuttle = new Shuttle();
+
         $this->doExecute($input, $output);
     }
 
-    protected function runCommand($command, $timeout = null, $env = [])
+    protected function runCommand($command, $timeout = null, $env = [], $quiet = false)
     {
         $this->logCommand($command);
         $env = array_replace($_ENV, $_SERVER, $env);
@@ -41,12 +49,33 @@ abstract class AbstractCommand extends Command
             }
         });
         if (!$process->isSuccessful()) {
-            $this->logError($process->getErrorOutput());
+            if (!$quiet) {
+                $this->logError($process->getErrorOutput());
+            }
 
             return false;
         }
 
         return trim($process->getOutput());
+    }
+
+    /**
+     * Check if the project is ready for docker.
+     * Logs an error if the project is not ready for docker.
+     *
+     * @return true
+     */
+    protected function isDockerized($quiet = false)
+    {
+        if (!(file_exists(self::DOCKER_COMPOSE_LINUX_FILE_NAME) && file_exists(self::DOCKER_COMPOSE_MAC_FILE_NAME))) {
+            if (!$quiet) {
+                $this->logError("There is no docker-compose file present. Run `spaceport init` first");
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
