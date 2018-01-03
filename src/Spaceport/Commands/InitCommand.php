@@ -46,12 +46,15 @@ class InitCommand extends AbstractCommand
 
     private function fetchDatabase(OutputInterface $output)
     {
-        $command = $this->getApplication()->find("db");
+        if ($this->io->confirm('Should I fetch the database from your server?', false)) {
 
-        $arguments = ['command' => 'db', '--sync' => true];
+            $command = $this->getApplication()->find("db");
 
-        $dbInput = new ArrayInput($arguments);
-        $command->run($dbInput, $output);
+            $arguments = ['command' => 'db', '--fetch' => true];
+
+            $dbInput = new ArrayInput($arguments);
+            $command->run($dbInput, $output);
+        }
     }
 
     private function writeConfigDockerFile()
@@ -128,26 +131,13 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
 
     private function findApacheSettings()
     {
-        $jenkinsFile = '.skylab/jenkins.yml';
-        if (file_exists($jenkinsFile)) {
-            $yaml = new Parser();
-            $value = $yaml->parse(file_get_contents($jenkinsFile));
-            $this->shuttle->setName($value["deploy_matrix"][$value["database_source"]]["project"]);
-            $this->shuttle->setServer($value["deploy_matrix"][$value["database_source"]]["server"]);
-            $this->shuttle->setApacheFallbackDomain($this->shuttle->getName() . '.' . $this->shuttle->getServer());
-            $this->shuttle->setRunSync($this->io->confirm('Should I fetch the database from your server?'));
-        } else {
-            $question = new Question('What is the name of the project?', $this->shuttle->getName());
-            $this->shuttle->setName($this->io->askQuestion($question));
-            if ($this->io->confirm('Is your project online available?', false)) {
-                $question = new Question('What is the domain name of your project?');
-                $this->shuttle->setServer($this->io->askQuestion($question));
-                $this->shuttle->setApacheFallbackDomain($this->shuttle->getServer());
-                $this->shuttle->setRunSync($this->io->confirm('Should I fetch the database from your server?'));
-            }
-        }
         $question = new Question('What is the Apache DocumentRoot?', $this->shuttle->getApacheDocumentRoot());
         $this->shuttle->setApacheDocumentRoot($this->io->askQuestion($question));
+        $question = new Question('What server should be used as the fallback domain ? (Can be left empty)');
+        $question->setValidator(function () {
+            return true;
+        });
+        $this->shuttle->setApacheFallbackDomain($this->io->askQuestion($question));
         $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
     }
 

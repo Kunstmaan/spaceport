@@ -13,6 +13,7 @@ class StopCommand extends AbstractCommand
     {
         $this
             ->setName('stop')
+            ->addOption('all', null, null, 'Stop all containers from all projects running on docker')
             ->setDescription('Stop the development environment')
         ;
     }
@@ -25,12 +26,23 @@ class StopCommand extends AbstractCommand
 
             return;
         }
-        $this->stopDocker();
+
+        if($input->getOption('all')) {
+            $this->stopAllContainers();
+        } else {
+            $this->stopProjectContainers();
+        }
     }
 
-    private function stopDocker()
+    private function stopAllContainers()
     {
-        $this->logStep("Stopping containers");
+        $this->logStep("Stopping all containers");
+        $this->runCommand('docker stop $(docker ps -aq)');
+    }
+
+    private function stopProjectContainers()
+    {
+        $this->logStep("Stopping project containers");
         $serverInfo = php_uname('s');
         if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' stop');
