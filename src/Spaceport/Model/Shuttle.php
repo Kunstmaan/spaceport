@@ -59,7 +59,7 @@ class Shuttle
     public function __construct()
     {
         $this->name = basename(getcwd());
-        $this->apacheVhost = basename(getcwd()) . self::DOCKER_EXT;
+        $this->apacheVhost = $this->name . self::DOCKER_EXT;
         $this->apacheDocumentRoot = "/app/web/";
         $this->runSync = false;
         $this->databases = [];

@@ -15,7 +15,7 @@ services:
             - app
         hostname: {{ shuttle.apacheVhost }}
         environment:
-            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
+            VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
             VIRTUAL_PORT: 80
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
             HTTPS_METHOD: noredirect
