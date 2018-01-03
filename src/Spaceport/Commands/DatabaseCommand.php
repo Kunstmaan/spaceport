@@ -17,7 +17,8 @@ class DatabaseCommand extends AbstractCommand
             ->setDescription('Perform datbase actions (e.g. sync, remove, reinit)')
             ->addOption('sync', null, null, 'Sync the database from a server')
             ->addOption('remove', null, null, 'Remove the database and it\'s container.')
-            ->addOption('reinit', null, null, 'Reinitialize the database');
+            ->addOption('reinit', null, null, 'Reinitialize the database')
+            ->addOption('fetch', null, null, 'Fetch the database file from the remote server');
     }
 
     protected function doExecute(InputInterface $input, OutputInterface $output)
@@ -25,6 +26,10 @@ class DatabaseCommand extends AbstractCommand
         if ($this->isDockerized()) {
             //Always create the .spaceport/mysql dir
             $this->runCommand(sprintf('mkdir -p ~/.spaceport/mysql/%s', $this->shuttle->getName()));
+
+            if ($input->getOption('fetch')) {
+                $this->fetchDatabaseBackup();
+            }
 
             if ($input->getOption('sync')) {
                 $this->fetchDatabaseBackup();
@@ -48,8 +53,8 @@ class DatabaseCommand extends AbstractCommand
         $question = new Question('What is the hostname of the server ?');
         $this->shuttle->setServer($this->io->askQuestion($question));
         $question = new Question('What is the name of the project?', $this->shuttle->getName());
-        $this->shuttle->setName($this->io->askQuestion($question));
-        $question = new Question('What is the location and filename of the mysql backup ?', sprintf('/home/projects/%s/backup/mysql.dmp.gz', $this->shuttle->getName()));
+        $projectName = $this->io->askQuestion($question);
+        $question = new Question('What is the location and filename of the mysql backup ?', sprintf('/home/projects/%s/backup/mysql.dmp.gz', $projectName));
         $databaseBackupLocationFileName = $this->io->askQuestion($question);
 
         $returnValue = $this->runCommand(sprintf('ssh %s stat %s', $this->shuttle->getServer(), $databaseBackupLocationFileName), null, [], true);
