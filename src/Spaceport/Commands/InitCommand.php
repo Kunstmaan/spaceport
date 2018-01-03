@@ -4,6 +4,7 @@ namespace Spaceport\Commands;
 
 use Spaceport\Exceptions\NotASymfonyProjectException;
 use Spaceport\Model\DatabaseConnection;
+use Spaceport\Model\Shuttle;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
