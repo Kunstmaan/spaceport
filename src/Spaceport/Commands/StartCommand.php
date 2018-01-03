@@ -49,7 +49,8 @@ class StartCommand extends AbstractCommand
         $this->startContainers();
         $this->startProxy();
         $this->copyApacheConfig();
-        $this->logSuccess('Docker is up and running');
+        $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
+        $this->logSuccess($text);
     }
 
     private function startContainers()
