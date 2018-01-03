@@ -14,7 +14,7 @@ class DatabaseCommand extends AbstractCommand
     {
         $this
             ->setName('db')
-            ->setDescription('Perform datbase actions (e.g. sync, remove, reinit)')
+            ->setDescription('Perform database actions (e.g. sync, remove, reinit)')
             ->addOption('sync', null, null, 'Sync the database from a server')
             ->addOption('remove', null, null, 'Remove the database and it\'s container.')
             ->addOption('reinit', null, null, 'Reinitialize the database');
@@ -60,7 +60,7 @@ class DatabaseCommand extends AbstractCommand
             exit;
         }
 
-        $this->logStep('Syncing datbase file');
+        $this->logStep('Syncing database file');
 
         $this->runCommand(sprintf(
             'rsync --no-acls -rLDhz --delete --size-only %s:%s ~/.spaceport/mysql/%s/%s',

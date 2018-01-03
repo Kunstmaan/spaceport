@@ -47,6 +47,7 @@ class StartCommand extends AbstractCommand
     {
         $this->logStep("Building required containers");
         $this->startContainers();
+        $this->startMaildev();
         $this->startProxy();
         $this->copyApacheConfig();
         $this->logSuccess('Docker is up and running');
@@ -70,6 +71,28 @@ class StartCommand extends AbstractCommand
 
         } else {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' up -d');
+        }
+    }
+
+    private function startMaildev()
+    {
+        //Check if maildev container is present
+        $containerId = $this->runCommand('docker ps -a --filter="name=maildev" -q');
+        if (empty($containerId)) {
+            $this->logStep('Starting maildev');
+            $this->runCommand('docker network create isolated_maildev');
+            $this->runCommand('docker run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev');
+
+            return;
+        }
+
+        //Check if maildev is running
+        $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
+        if ($containerRunning == 'false') {
+            $this->logStep("Starting maildev");
+            $this->runCommand('docker start ' . $containerId);
+        } else {
+            $this->logStep("maildev already running -- Skipping");
         }
     }
 

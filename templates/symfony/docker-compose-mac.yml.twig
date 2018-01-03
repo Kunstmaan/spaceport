@@ -33,6 +33,9 @@ services:
             {{- '- mysql_' ~ database.mysqlDatabase }}
             {% endfor %}
             {{- '- elasticsearch' }}
+        networks:
+            - default
+            - isolated_maildev
         environment:
             APP_ENV: docker
             XDEBUG: 'off'
@@ -58,13 +61,6 @@ services:
             - "9300:9300"
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    maildev:
-        image: djfarrelly/maildev
-        ports:
-            - "1080:80"
-        environment:
-            VIRTUAL_HOST: {{ shuttle.apacheVhost }}
-            VIRTUAL_PORT: 1080
     node:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
@@ -75,4 +71,8 @@ volumes:
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
     {% endfor %}
     {{- shuttle.name }}-app-sync:
+        external: true
+
+networks:
+    isolated_maildev:
         external: true
