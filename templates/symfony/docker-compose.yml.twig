@@ -52,7 +52,7 @@ services:
             MYSQL_PASSWORD: {{ database.mysqlPassword }}
     {% endfor %}
     {{- 'elasticsearch:' }}
-        image: elasticsearch:{{ shuttle.elasticsearchVersion }}
+        image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
         ports:
             - "9200:9200"
             - "9300:9300"
