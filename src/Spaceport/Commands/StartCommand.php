@@ -22,7 +22,7 @@ class StartCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if(!file_exists(parent::DOCKER_COMPOSE_FILE_NAME)) {
+        if(!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
             $this->logError("There is no docker-compose.yml file present. Run `spaceport init` first");
 
             return;
@@ -55,8 +55,8 @@ class StartCommand extends AbstractCommand
     private function startContainers()
     {
         $serverInfo = php_uname('s');
-        if (strpos($serverInfo, 'Darwin') !== false && file_exists('docker-compose-dev.yml')) {
-            $config = Yaml::parse(file_get_contents('docker-compose-dev.yml'));
+        if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+            $config = Yaml::parse(file_get_contents(parent::DOCKER_COMPOSE_MAC_FILE_NAME));
             if (isset($config['volumes'])) {
                 foreach ($config['volumes'] as $volume => $data) {
                     if (!empty($data) && isset($data['external']) && $data['external'] == true) {
@@ -65,11 +65,11 @@ class StartCommand extends AbstractCommand
                 }
             }
 
-            $this->runCommand('docker-compose -f docker-compose-dev.yml up -d');
+            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' up -d');
             $this->runCommand('docker-sync start');
 
         } else {
-            $this->runCommand('docker-compose up -d');
+            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' up -d');
         }
     }
 

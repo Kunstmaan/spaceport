@@ -20,8 +20,8 @@ class StopCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if(!file_exists(parent::DOCKER_COMPOSE_FILE_NAME)) {
-            $this->logError("There is no docker-compose.yml file present. Run `spaceport init` first");
+        if(!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME) || !file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+            $this->logError("There is no docker-compose file present. Run `spaceport init` first");
 
             return;
         }
@@ -31,10 +31,12 @@ class StopCommand extends AbstractCommand
     private function stopDocker()
     {
         $this->logStep("Stopping containers");
-        $this->runCommand('docker-compose stop');
         $serverInfo = php_uname('s');
-        if (strpos($serverInfo, 'Darwin') !== false && file_exists('docker-compose-dev.yml')) {
+        if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' stop');
             $this->runCommand('docker-sync stop');
+        } else {
+            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' stop');
         }
 
         $this->logSuccess('Docker stopped');

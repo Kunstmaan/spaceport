@@ -118,9 +118,9 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $this->findPHPSettings();
         $this->askElasticVersion();
         $this->askNodeVersion();
-        $this->logStep('Generating the docker-compose.yml file');
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_FILE_NAME, ['shuttle' => $this->shuttle]);
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_DEV_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_DEV_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->logStep('Generating the docker-compose file');
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_LINUX_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_MAC_FILE_NAME, ['shuttle' => $this->shuttle]);
         $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_SYNC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_SYNC_FILE_NAME, ['shuttle' => $this->shuttle]);
     }
 
