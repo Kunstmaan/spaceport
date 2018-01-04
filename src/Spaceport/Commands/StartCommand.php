@@ -46,8 +46,8 @@ class StartCommand extends AbstractCommand
     private function runDocker()
     {
         $this->logStep("Building required containers");
-        $this->startContainers();
         $this->startMaildev();
+        $this->startContainers();
         $this->startProxy();
         $this->copyApacheConfig();
         $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
