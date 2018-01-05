@@ -9,6 +9,8 @@ use Symfony\Component\Yaml\Yaml;
 class StartCommand extends AbstractCommand
 {
 
+    const MAILDEV_NETWORK = "isolated_maildev";
+
     protected function configure()
     {
         $this
@@ -77,11 +79,16 @@ class StartCommand extends AbstractCommand
 
     private function startMaildev()
     {
+        //Check if the network is already created
+        $output = $this->runCommand('docker network ls | grep ' . self::MAILDEV_NETWORK);
+        if (empty($output)) {
+            $this->logStep("Creating maildev network");
+            $this->runCommand("docker network create isolated_maildev");
+        }
         //Check if maildev container is present
         $containerId = $this->runCommand('docker ps -a --filter="name=maildev" -q');
         if (empty($containerId)) {
             $this->logStep('Starting maildev');
-            $this->runCommand('docker network create isolated_maildev');
             $this->runCommand('docker run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev');
 
             return;
