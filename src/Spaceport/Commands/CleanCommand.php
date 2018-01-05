@@ -22,7 +22,10 @@ class CleanCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        $this->runCommand('docker rm $(docker ps -a -f status=exited -q)');
+        $output = $this->runCommand('docker ps -a -f status=exited -q', null, [], true);
+        if (!empty($output)) {
+            $this->runCommand('docker rm $(docker ps -a -f status=exited -q)');
+        }
         $removeImages = $input->getOption('images');
         $removeAll = $input->getOption('all');
         if ($removeAll) {
