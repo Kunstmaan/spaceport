@@ -35,6 +35,7 @@ class InitCommand extends AbstractCommand
         if (!$this->isDockerized(true) || $input->getOption('force')) {
             $this->writeDockerComposeFile();
             $this->writeConfigDockerFile();
+            $this->addToGitignore();
         }
         $this->checkAppFile();
         $this->checkAppKernelFile();
@@ -243,5 +244,18 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
 
         return $sslFilesLocation;
+    }
+
+    /**
+     * Add certain files to the gitignore if one is available.
+     */
+    private function addToGitignore()
+    {
+        if (file_exists('.gitignore')) {
+            //Add .docker-sync to gitignore
+            if (!exec('grep .docker-sync .gitignore')) {
+                file_put_contents('.gitignore', '.docker-sync', FILE_APPEND | LOCK_EX);
+            }
+        }
     }
 }
