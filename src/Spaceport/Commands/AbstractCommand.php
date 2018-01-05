@@ -33,6 +33,8 @@ abstract class AbstractCommand extends Command
 
         $this->shuttle = new Shuttle();
 
+        $this->checkDockerDaemonIsRunning();
+
         $this->doExecute($input, $output);
     }
 
@@ -76,6 +78,22 @@ abstract class AbstractCommand extends Command
         }
 
         return true;
+    }
+
+    private function checkDockerDaemonIsRunning()
+    {
+        $serverInfo = php_uname('s');
+        if (strpos($serverInfo, 'Darwin') !== false) {
+            $output = $this->runCommand('ps aux | grep docker | grep -v \'grep\' | grep -v \'com.docker.vmnetd\'', null, [], true);
+            if (empty($output)) {
+                $this->logError("Docker daemon is not running. Start Docker first before using spaceport");
+
+                exit(1);
+            }
+        } else {
+            //TODO
+            //Check linux docker is running
+        }
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
