@@ -80,7 +80,7 @@ class StartCommand extends AbstractCommand
     private function startMaildev()
     {
         //Check if the network is already created
-        $output = $this->runCommand('docker network ls | grep ' . self::MAILDEV_NETWORK);
+        $output = $this->runCommand('docker network ls | grep ' . self::MAILDEV_NETWORK, null, [], true);
         if (empty($output)) {
             $this->logStep("Creating maildev network");
             $this->runCommand("docker network create isolated_maildev");
