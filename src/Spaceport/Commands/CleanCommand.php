@@ -26,6 +26,8 @@ class CleanCommand extends AbstractCommand
         if (!empty($output)) {
             $this->runCommand('docker rm $(docker ps -a -f status=exited -q)');
         }
+        $this->runCommand('docker network prune -f');
+
         $removeImages = $input->getOption('images');
         $removeAll = $input->getOption('all');
         if ($removeAll) {
@@ -36,6 +38,7 @@ class CleanCommand extends AbstractCommand
         if (!$removeAll && $removeImages) {
             $this->runCommand('docker rmi $(docker images -a -q)');
         }
+
 
         $this->logSuccess('All gone :)');
     }
