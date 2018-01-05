@@ -15,7 +15,7 @@ class CleanCommand extends AbstractCommand
             ->setName('clean')
             ->addOption('images', 'i', InputOption::VALUE_NONE, 'Remove images')
             ->addOption('all', 'a', InputOption::VALUE_NONE, 'Remove everything')
-            ->setDescription('Run npm commands')
+            ->setDescription('Clean docker containers, images and volumes')
         ;
     }
 
