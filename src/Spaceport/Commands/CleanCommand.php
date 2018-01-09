@@ -31,12 +31,22 @@ class CleanCommand extends AbstractCommand
         $removeImages = $input->getOption('images');
         $removeAll = $input->getOption('all');
         if ($removeAll) {
-            $this->runCommand('docker rmi $(docker images -a -q)');
-            $this->runCommand('docker volume rm $(docker volume ls -q)');
+            $output = $this->runCommand('docker images -a -q', null, [], true);
+            if (!empty($output)) {
+                $this->runCommand('docker rmi $(docker images -a -q)');
+            }
+
+            $output = $this->runCommand('docker volume ls -q', null, [], true);
+            if (!empty($output)) {
+                $this->runCommand('docker volume rm $(docker volume ls -q)');
+            }
         }
 
         if (!$removeAll && $removeImages) {
-            $this->runCommand('docker rmi $(docker images -a -q)');
+            $output = $this->runCommand('docker images -a -q', null, [], true);
+            if (!empty($output)) {
+                $this->runCommand('docker rmi $(docker images -a -q)');
+            }
         }
 
 
