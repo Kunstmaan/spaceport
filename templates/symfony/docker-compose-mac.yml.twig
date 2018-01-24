@@ -5,6 +5,7 @@ services:
         image: busybox
         volumes:
             - {{ shuttle.name }}-app-sync:/app:rw
+            - ./src:/app/src
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
     apache:

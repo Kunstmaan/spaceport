@@ -1,9 +1,8 @@
 version: '2'
 options:
-  #compose-file-path: './docker-compose.yml'
   compose-dev-file-path: './docker-compose-mac.yml'
   verbose: false
 syncs:
     {{ shuttle.name }}-app-sync:
         src: './'
-        sync_excludes: ['.sass-cache', 'sass', 'sass-cache', '.git', 'var/cache', 'app/cache', 'web/uploads', '.docker-sync', '.idea']
+        sync_excludes: ['src', '.sass-cache', 'sass', '.git', 'var/cache', 'app/cache', 'web/uploads', '.docker-sync', '.idea']
