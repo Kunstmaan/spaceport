@@ -1,19 +1,12 @@
-version: '2'
+version: '3'
 
 services:
-    app:
-        image: busybox
-        volumes:
-            - {{ shuttle.name }}-app-sync:/app:rw
-            - ./src:/app/src
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.composer:/root/.composer
     apache:
         image: kunstmaan/spaceport-apache
         links:
             - php
-        volumes_from:
-            - app
+        volumes:
+            - app:/app:rw
         hostname: {{ shuttle.apacheVhost }}
         environment:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
@@ -22,13 +15,35 @@ services:
             HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
 
-            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
+            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
             {%- endif %}
-
+    bg-sync:
+        image: cweagans/bg-sync
+        volumes:
+            - .:/source:rw
+            - app:/app:rw
+        environment:
+            SYNC_DESTINATION: /app
+            SYNC_MAX_INOTIFY_WATCHES: 40000
+            SYNC_VERBOSE: 1
+            SYNC_EXTRA_UNISON_PROFILE_OPTS: |
+              ignore = Name .DS_Store
+              ignore = Name *.tmp
+              ignore = Name .unison.*
+              ignore = Name .idea
+              ignore = Name .git
+              ignore = Name node_modules
+              ignore = Name web/uploads
+              ignore = Name .sass-cache
+              ignore = Name var/cache
+              ignore = Name app/cache
+        privileged: true
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
-        volumes_from:
-            - app
+        volumes:
+            - app:/app:rw
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+            - ~/.composer:/root/.composer
         links:
             {% for database in shuttle.databases %}
             {{- '- mysql_' ~ database.mysqlDatabase }}
@@ -44,8 +59,6 @@ services:
     {% for database in shuttle.databases %}
     {{- 'mysql_' ~ database.mysqlDatabase }}:
         image: kunstmaan/spaceport-mysql
-        volumes_from:
-            - app
         volumes:
             - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
             - {{ '~/.spaceport/mysql/' ~ database.mysqlDatabase }}:/docker-entrypoint-initdb.d
@@ -62,14 +75,13 @@ services:
     node:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
-            - {{ shuttle.name }}-app-sync:/src:rw
+            - app:/src:rw
 
 volumes:
     {% for database in shuttle.databases %}
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
     {% endfor %}
-    {{- shuttle.name }}-app-sync:
-        external: true
+    {{- 'app' }}: {}
 
 networks:
     isolated_maildev:

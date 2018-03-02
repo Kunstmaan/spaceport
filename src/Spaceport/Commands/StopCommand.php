@@ -46,7 +46,6 @@ class StopCommand extends AbstractCommand
         $serverInfo = php_uname('s');
         if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' stop');
-            $this->runCommand('docker-sync stop');
         } else {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' stop');
         }

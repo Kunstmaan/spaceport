@@ -35,7 +35,6 @@ class InitCommand extends AbstractCommand
         if (!$this->isDockerized(true) || $input->getOption('force')) {
             $this->writeDockerComposeFile();
             $this->writeConfigDockerFile();
-            $this->addToGitignore();
         }
         $this->checkAppFile();
         $this->checkAppKernelFile();
@@ -103,7 +102,6 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $this->logStep('Generating the docker-compose file');
         $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_LINUX_FILE_NAME, ['shuttle' => $this->shuttle]);
         $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_MAC_FILE_NAME, ['shuttle' => $this->shuttle]);
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_SYNC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_SYNC_FILE_NAME, ['shuttle' => $this->shuttle]);
     }
 
     private function findPHPSettings($ask = true)
@@ -134,10 +132,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     {
         $question = new Question('What is the Apache DocumentRoot?', $this->shuttle->getApacheDocumentRoot());
         $this->shuttle->setApacheDocumentRoot($this->io->askQuestion($question));
-        $question = new Question('What server should be used as the fallback domain ? (Can be left empty)');
-        $question->setValidator(function () {
-            return true;
-        });
+        $question = new Question('What server should be used as the fallback domain ? (Can be left empty)', '');
         $this->shuttle->setApacheFallbackDomain($this->io->askQuestion($question));
         $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
     }
@@ -244,18 +239,5 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         }
 
         return $sslFilesLocation;
-    }
-
-    /**
-     * Add certain files to the gitignore if one is available.
-     */
-    private function addToGitignore()
-    {
-        if (file_exists('.gitignore')) {
-            //Add .docker-sync to gitignore
-            if (!exec('grep .docker-sync .gitignore')) {
-                file_put_contents('.gitignore', '.docker-sync', FILE_APPEND | LOCK_EX);
-            }
-        }
     }
 }
