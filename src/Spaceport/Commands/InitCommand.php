@@ -132,7 +132,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     {
         $question = new Question('What is the Apache DocumentRoot?', $this->shuttle->getApacheDocumentRoot());
         $this->shuttle->setApacheDocumentRoot($this->io->askQuestion($question));
-        $question = new Question('What server should be used as the fallback domain ? (Can be left empty)', '');
+        $question = new Question('What server should be used as the fallback domain ? (Can be left empty)', '/');
         $this->shuttle->setApacheFallbackDomain($this->io->askQuestion($question));
         $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
     }

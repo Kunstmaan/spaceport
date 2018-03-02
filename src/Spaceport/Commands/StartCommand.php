@@ -33,7 +33,7 @@ class StartCommand extends AbstractCommand
         $clean = $input->getOption('clean');
         if ($clean) {
             $this->logStep("Cleaning containers");
-            $this->runCommand('docker-compose down');
+            $this->runCommand('docker-compose down --remove-orphans');
         }
 
         $fresh = $input->getOption('fresh-images');
