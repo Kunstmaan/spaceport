@@ -6,6 +6,7 @@ services:
         links:
             - php
         volumes:
+            - .:/app:cached
             - app:/app:rw
         hostname: {{ shuttle.apacheVhost }}
         environment:
@@ -26,6 +27,7 @@ services:
             SYNC_DESTINATION: /app
             SYNC_MAX_INOTIFY_WATCHES: 40000
             SYNC_VERBOSE: 1
+            SYNC_PREFER: newer
             SYNC_EXTRA_UNISON_PROFILE_OPTS: |
               ignore = Name .DS_Store
               ignore = Name *.tmp
@@ -37,10 +39,13 @@ services:
               ignore = Name .sass-cache
               ignore = Name var/cache
               ignore = Name app/cache
+              ignore = Name vendor
+              ignore = Name bin
         privileged: true
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes:
+            - .:/app:cached
             - app:/app:rw
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
