@@ -150,7 +150,7 @@ class Shuttle
      */
     public function setApacheFallbackDomain($apacheFallbackDomain)
     {
-        $this->apacheFallbackDomain = $apacheFallbackDomain;
+        $this->apacheFallbackDomain = $apacheFallbackDomain == '/' ? null : $apacheFallbackDomain;
     }
 
     /**

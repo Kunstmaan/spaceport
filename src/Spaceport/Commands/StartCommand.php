@@ -33,7 +33,7 @@ class StartCommand extends AbstractCommand
         $clean = $input->getOption('clean');
         if ($clean) {
             $this->logStep("Cleaning containers");
-            $this->runCommand('docker-compose down');
+            $this->runCommand('docker-compose down --remove-orphans');
         }
 
         $fresh = $input->getOption('fresh-images');
@@ -70,8 +70,6 @@ class StartCommand extends AbstractCommand
             }
 
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' up -d');
-            $this->runCommand('docker-sync start');
-
         } else {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' up -d');
         }

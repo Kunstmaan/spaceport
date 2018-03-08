@@ -14,7 +14,6 @@ abstract class AbstractCommand extends Command
 
     CONST DOCKER_COMPOSE_LINUX_FILE_NAME="docker-compose.yml";
     CONST DOCKER_COMPOSE_MAC_FILE_NAME="docker-compose-mac.yml";
-    CONST DOCKER_COMPOSE_SYNC_FILE_NAME="docker-sync.yml";
 
     use TwigTrait;
     use IOTrait;
