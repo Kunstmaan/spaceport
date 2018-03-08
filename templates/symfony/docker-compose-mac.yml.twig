@@ -18,6 +18,7 @@ services:
 
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
             {%- endif %}
+
     bg-sync:
         image: cweagans/bg-sync
         volumes:
