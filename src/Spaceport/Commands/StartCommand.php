@@ -16,15 +16,14 @@ class StartCommand extends AbstractCommand
         $this
             ->setName('start')
             ->setDescription('Start the development environment')
-            ->addOption('clean', null, null, 'Start with clean containers')
-            ->addOption('fresh-images', null, null, 'Pull new images from dockerhub.')
-        ;
+            ->addOption('clean', null, null, 'Start with clean containers.')
+            ->addOption('fresh-images', null, null, 'Pull new images from dockerhub.');
     }
 
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if(!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
+        if (!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
             $this->logError("There is no docker-compose.yml file present. Run `spaceport init` first");
 
             return;
@@ -36,8 +35,8 @@ class StartCommand extends AbstractCommand
             $this->runCommand('docker-compose down --remove-orphans');
         }
 
-        $fresh = $input->getOption('fresh-images');
-        if ($fresh) {
+        $freshImages = $input->getOption('fresh-images');
+        if ($freshImages) {
             $this->logStep("Pulling required images");
             $this->runCommand('docker-compose pull');
         }

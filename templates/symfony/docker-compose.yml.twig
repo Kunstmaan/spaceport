@@ -21,7 +21,7 @@ services:
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes:
-            - .:/app:cached
+            - .:/app:rw
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
         links:
