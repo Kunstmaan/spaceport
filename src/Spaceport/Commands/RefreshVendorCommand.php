@@ -21,13 +21,10 @@ class RefreshVendorCommand extends AbstractCommand
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
-        $freshVendor = $input->getOption('fresh-vendor');
-        if ($freshVendor) {
-            $this->logStep("Initializing vendor folder on container and copying them onto the host.");
-            $this->logWarning("This can be a potentially long process.");
-            $this->runCommand('docker exec $(docker-compose ps -q php) composer install');
-            $this->runCommand('docker cp $(docker-compose ps -q php):/app/vendor vendor/');
-            $this->logSuccess("Vendor folder initialized and copied to your host system!");
-        }
+        $this->logStep("Initializing vendor folder on container and copying them onto the host.");
+        $this->logWarning("This can be a potentially long process.");
+        $this->runCommand('docker exec $(docker-compose ps -q php) composer install');
+        $this->runCommand('docker cp $(docker-compose ps -q php):/app/vendor vendor/');
+        $this->logSuccess("Vendor folder initialized and copied to your host system!");
     }
 }
