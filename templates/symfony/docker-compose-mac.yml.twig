@@ -82,6 +82,8 @@ services:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
             - app:/src:rw
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+            - ~/.npm:/root/.npm
 
 volumes:
     {% for database in shuttle.databases %}

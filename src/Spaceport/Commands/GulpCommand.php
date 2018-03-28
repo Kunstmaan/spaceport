@@ -26,6 +26,6 @@ class GulpCommand extends AbstractCommand
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
         $command = $input->getArgument('commandArgs');
-        $this->runCommand('docker-compose run --rm --no-deps node /usr/local/bin/buildgulp ' . implode(" ", $command));
+        $this->runCommand('docker exec $(docker-compose ps -q node) /usr/local/bin/buildgulp --allow-root ' . implode(" ", $command));
     }
 }

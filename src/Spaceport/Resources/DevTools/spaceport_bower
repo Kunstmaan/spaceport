@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-
-docker-compose run --rm --no-deps node /usr/local/bin/bower --allow-root $@

@@ -117,7 +117,7 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
     private function askElasticVersion($ask = true)
     {
         if ($ask) {
-            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['5', '2'], '5'));
+            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['6', '5', '2'], '5'));
         }
     }
 
