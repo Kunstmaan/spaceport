@@ -67,7 +67,7 @@ class InitCommand extends AbstractCommand
     private function checkAppFile()
     {
         $this->logStep('Checking if the web/app.php file is setup for Docker');
-        if (strpos(file_get_contents("web/app.php"), 'docker') === false) {
+        if (file_exists("web/app.php") && strpos(file_get_contents("web/app.php"), 'docker') === false) {
             $this->logWarning('The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
 
 if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
@@ -84,7 +84,7 @@ if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
     private function checkAppKernelFile()
     {
         $this->logStep('Checking if the app/AppKernel.php file is setup for Docker');
-        if (strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
+        if (file_exists("app/AppKernel.php") && strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
             $this->logWarning('The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
 
 if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true)) {'
@@ -152,7 +152,8 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         } elseif (file_exists($oldParametersFile)) {
             $parameters = parse_ini_file($oldParametersFile, true);
         } else {
-            throw new NotASymfonyProjectException("No parameters.yml or parameters.ini file found at " . $parametersFile);
+            $this->io->writeln("No parameters.yml or parameters.ini file found at " . $parametersFile);
+            return;
         }
 
         if (
