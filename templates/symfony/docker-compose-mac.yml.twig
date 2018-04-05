@@ -42,6 +42,7 @@ services:
               ignore = Name app/cache
               ignore = Name vendor
               ignore = Name bin
+              ignorenot = Name bin/console
         privileged: true
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
