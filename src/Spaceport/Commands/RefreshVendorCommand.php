@@ -13,7 +13,7 @@ class RefreshVendorCommand extends AbstractCommand
     {
         $this
             ->setName('vendor')
-            ->setDescription('Runs a composer install on the container and copies the files back to the host.')
+            ->setDescription('Runs a composer install on the container.')
         ;
     }
 
@@ -21,11 +21,9 @@ class RefreshVendorCommand extends AbstractCommand
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
-        $this->logStep("Initializing vendor folder on container and copying them onto the host.");
+        $this->logStep("Initializing vendor folder on container.");
         $this->logWarning("This can be a potentially long process.");
         $this->runCommand('docker exec $(docker-compose ps -q php) composer install');
-        $this->runCommand('docker cp $(docker-compose ps -q php):/app/vendor vendor_sync/');
-        $this->runCommand('rm -rf vendor && mv vendor_sync vendor');
-        $this->logSuccess("Vendor folder initialized and copied to your host system!");
+        $this->logSuccess("Vendor folder initialized!");
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Spaceport\Commands;
 
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 class StartCommand extends AbstractCommand
@@ -41,33 +43,24 @@ class StartCommand extends AbstractCommand
             $this->runCommand('docker-compose pull');
         }
 
-        $this->runDocker();
+        $this->runDocker($output);
     }
 
-    private function runDocker()
+    private function runDocker(OutputInterface $output)
     {
         $this->logStep("Building required containers");
         $this->startMaildev();
-        $this->startContainers();
+        $this->startContainers($output);
         $this->startProxy();
         $this->copyApacheConfig();
         $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
         $this->logSuccess($text);
     }
 
-    private function startContainers()
+    private function startContainers(OutputInterface $output)
     {
-        $serverInfo = php_uname('s');
-        if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
-            $config = Yaml::parse(file_get_contents(parent::DOCKER_COMPOSE_MAC_FILE_NAME));
-            if (isset($config['volumes'])) {
-                foreach ($config['volumes'] as $volume => $data) {
-                    if (!empty($data) && isset($data['external']) && $data['external'] == true) {
-                        $this->runCommand("docker volume create --name=$volume");
-                    }
-                }
-            }
-
+        if (\PHP_OS === 'Darwin' && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+            $this->configureNfsExports($output);
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' up -d');
         } else {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' up -d');
@@ -134,6 +127,41 @@ class StartCommand extends AbstractCommand
             } else {
                 $this->logWarning("No running Apache container found!.");
             }
+        }
+    }
+
+    private function configureNfsExports(OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('setup-nfs');
+        $command->run(new ArrayInput([]), $output);
+
+        $projectRoot = getcwd();
+        $uid = $this->runCommand('id -u');
+        $gid = $this->runCommand('stat -f \'%g\' /etc/exports');
+
+        $projectExportsConfig = sprintf('\"%s\" localhost -alldirs -mapall=%s:%s', $projectRoot, $uid, $gid);
+
+        if ($this->runCommand(sprintf('grep -qF -- "%s" "/etc/exports"', $projectExportsConfig), null, [], true) === false) {
+            $lines = sprintf('# SPACEPORT-BEGIN: %s %s', $uid, $projectRoot) . '\n';
+            $lines .= $projectExportsConfig . '\n';
+            $lines .= sprintf('# SPACEPORT-END: %s %s', $uid, $projectRoot) . '\n';
+
+            if ($this->runCommand(sprintf('echo "%s" | sudo tee -a /etc/exports', $lines), null, [], true) === false) {
+                $this->logError('Unable to setup nfs exports config for project');
+                exit(1);
+            }
+
+            $this->logStep('Nfs config change done. Restarting docker..');
+
+            $this->runCommand('sudo nfsd restart');
+            $this->runCommand('osascript -e \'quit app "Docker"\'');
+            $this->runCommand('open -a Docker');
+
+            $process = new Process('while ! docker ps > /dev/null 2>&1 ; do sleep 2; done');
+            $process->start();
+            $process->wait();
+
+            $this->logStep('Docker restarted...');
         }
     }
 }
