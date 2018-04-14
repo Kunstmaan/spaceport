@@ -36,5 +36,6 @@ $app->add(new Spaceport\Commands\CleanCommand());
 $app->add(new Spaceport\Commands\PhpCommand());
 $app->add(new Spaceport\Commands\RefreshVendorCommand());
 $app->add(new Spaceport\Commands\SelfUpdateCommand());
+$app->add(new Spaceport\Commands\SetupNfsCommand());
 
 $app->run();
