@@ -6,8 +6,7 @@ services:
         links:
             - php
         volumes:
-            - .:/app:cached
-            - app:/app:rw
+            - "nfsmount:/app"
         hostname: {{ shuttle.apacheVhost }}
         environment:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
@@ -19,37 +18,10 @@ services:
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
             {%- endif %}
 
-    bg-sync:
-        image: cweagans/bg-sync
-        volumes:
-            - .:/source:rw
-            - app:/app:rw
-        environment:
-            SYNC_DESTINATION: /app
-            SYNC_MAX_INOTIFY_WATCHES: 40000
-            SYNC_VERBOSE: 1
-            SYNC_PREFER: newer
-            SYNC_EXTRA_UNISON_PROFILE_OPTS: |
-              ignore = Name .DS_Store
-              ignore = Name *.tmp
-              ignore = Name .unison.*
-              ignore = Name .idea
-              ignore = Name .git
-              ignore = Name node_modules
-              ignore = Name web/uploads
-              ignore = Name .sass-cache
-              ignore = Name var/cache
-              ignore = Name app/cache
-              ignore = Name vendor
-              ignore = Name vendor_sync
-              ignore = Name bin
-              ignorenot = Name bin/console
-        privileged: true
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes:
-            - .:/app:cached
-            - app:/app:rw
+            - "nfsmount:/app"
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
         links:
@@ -83,7 +55,7 @@ services:
     node:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
-            - app:/src:rw
+            - "nfsmount:/app"
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.npm:/root/.npm
 
@@ -92,6 +64,12 @@ volumes:
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
     {% endfor %}
     {{- 'app' }}: {}
+    nfsmount:
+        driver: local
+        driver_opts:
+            type: nfs
+            o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+            device: ":${PWD}"
 
 networks:
     isolated_maildev:

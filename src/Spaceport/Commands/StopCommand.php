@@ -43,8 +43,7 @@ class StopCommand extends AbstractCommand
     private function stopProjectContainers()
     {
         $this->logStep("Stopping project containers");
-        $serverInfo = php_uname('s');
-        if (strpos($serverInfo, 'Darwin') !== false && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+        if (\PHP_OS === 'Darwin' && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' stop');
         } else {
             $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' stop');
