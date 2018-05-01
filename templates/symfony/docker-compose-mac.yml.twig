@@ -55,7 +55,7 @@ services:
     node:
         image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
         volumes:
-            - "nfsmount:/app"
+            - "nfsmount:/src"
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.npm:/root/.npm
 
