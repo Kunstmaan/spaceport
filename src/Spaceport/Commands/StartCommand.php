@@ -163,5 +163,14 @@ class StartCommand extends AbstractCommand
 
             $this->logStep('Docker restarted...');
         }
+
+        $process = new Process('sudo nfsd status');
+        $process->start();
+        $process->wait();
+        $status = $process->getOutput();
+        if (false !== strpos($status, 'nfsd is not running')) {
+            $this->runCommand('sudo nfsd start');
+            $this->logStep('Nfsd started...');
+        }
     }
 }
