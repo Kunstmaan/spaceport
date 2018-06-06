@@ -43,7 +43,20 @@ class StartCommand extends AbstractCommand
             $this->runCommand('docker-compose pull');
         }
 
+        $this->isApacheRunning();
         $this->runDocker($output);
+    }
+
+    private function isApacheRunning()
+    {
+        $process = new Process('pgrep httpd');
+        $process->start();
+        $process->wait();
+        $processes = $process->getOutput();
+        if (!empty($processes)) {
+            $this->logError('Apache seems to be running. Please shutdown apache and rerun the spaceport start command.');
+            exit(1);
+        }
     }
 
     private function runDocker(OutputInterface $output)
