@@ -25,10 +25,12 @@ class StartCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if (!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
-            $this->logError("There is no docker-compose.yml file present. Run `spaceport init` first");
-
-            return;
+        if (\PHP_OS === 'Darwin' && !file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+            $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", parent::DOCKER_COMPOSE_MAC_FILE_NAME));
+            exit(1);
+        } else if (!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
+            $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", parent::DOCKER_COMPOSE_LINUX_FILE_NAME));
+            exit(1);
         }
 
         $clean = $input->getOption('clean');
