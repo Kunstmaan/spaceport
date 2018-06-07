@@ -28,6 +28,7 @@ $app->add(new Spaceport\Commands\InitCommand());
 $app->add(new Spaceport\Commands\StartCommand());
 $app->add(new Spaceport\Commands\StopCommand());
 $app->add(new Spaceport\Commands\DatabaseCommand());
+$app->add(new Spaceport\Commands\DestroyCommand());
 $app->add(new Spaceport\Commands\NpmCommand());
 $app->add(new Spaceport\Commands\GulpCommand());
 $app->add(new Spaceport\Commands\GruntCommand());

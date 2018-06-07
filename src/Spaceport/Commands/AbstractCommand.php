@@ -79,6 +79,16 @@ abstract class AbstractCommand extends Command
         return true;
     }
 
+    /**
+     * Check is OS is MacOs
+     *
+     * @return bool
+     */
+    protected function isMacOs()
+    {
+        return \PHP_OS === 'Darwin';
+    }
+
     private function checkDockerDaemonIsRunning()
     {
         $serverInfo = php_uname('s');
