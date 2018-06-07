@@ -33,6 +33,7 @@ abstract class AbstractCommand extends Command
         $this->shuttle = new Shuttle();
 
         $this->checkDockerDaemonIsRunning();
+        $this->isApacheRunning();
 
         $this->doExecute($input, $output);
     }
@@ -89,10 +90,42 @@ abstract class AbstractCommand extends Command
         return \PHP_OS === 'Darwin';
     }
 
+    /**
+     * Check if nfsd is running
+     *
+     * @return bool
+     */
+    protected function isNfsdRunning()
+    {
+        // Command throws exit code so we need to do the process manually
+        $process = new Process('sudo nfsd status | grep "not running"');
+        $process->start();
+        $process->wait();
+        return empty($process->getOutput());
+    }
+
+    protected function getProxyContainerId()
+    {
+        return $this->runCommand('docker ps -a --filter="name=http-proxy" -q');
+    }
+
+    protected function isProxyRunning($containerId = null)
+    {
+        if (null === $containerId) {
+            $containerId = $this->getProxyContainerId();
+        }
+
+        if (empty($containerId)) {
+            return false;
+        }
+
+        $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
+        return $containerRunning !== 'false';
+    }
+
     private function checkDockerDaemonIsRunning()
     {
-        $serverInfo = php_uname('s');
-        if (strpos($serverInfo, 'Darwin') !== false) {
+        if ($this->isMacOs()) {
             $output = $this->runCommand('ps aux | grep docker | grep -v \'grep\' | grep -v \'com.docker.vmnetd\'', null, [], true);
             if (empty($output)) {
                 $this->logError("Docker daemon is not running. Start Docker first before using spaceport");
@@ -101,7 +134,30 @@ abstract class AbstractCommand extends Command
             }
         } else {
             //TODO
-            //Check linux docker is running
+            $output = $this->runCommand('ps aux | grep docker | grep -v \'grep\' | grep -v \'com.docker.vmnetd\'', null, [], true);
+            if (empty($output)) {
+                $this->logError("Docker daemon is not running. Start Docker first before using spaceport");
+
+                exit(1);
+            }
+        }
+    }
+
+    /**
+     * Check if apache is running, if so, exit when running spaceport start, otherwise just notify
+     */
+    private function isApacheRunning()
+    {
+        $process = new Process('pgrep httpd');
+        $process->start();
+        $process->wait();
+        $processes = $process->getOutput();
+        if (!empty($processes)) {
+            $this->logError('Apache seems to be running. Please shutdown apache and rerun your command.');
+            // Only exit on spaceport start
+            if ($this instanceof StartCommand) {
+                exit(1);
+            }
         }
     }
 

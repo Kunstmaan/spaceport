@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
-class SetupNfsCommand extends Command
+class SetupNfsCommand extends AbstractCommand
 {
     protected function configure()
     {
@@ -17,9 +17,9 @@ class SetupNfsCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        if (\PHP_OS !== 'Darwin') {
+        if (!$this->isMacOs()) {
             $output->writeln('This command should only be executed on OS X');
             exit(1);
         }
