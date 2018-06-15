@@ -45,6 +45,7 @@ class StartCommand extends AbstractCommand
             $this->runCommand('docker-compose pull');
         }
 
+        $this->setDinghySSLCerts();
         $this->runDocker($output);
     }
 

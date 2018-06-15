@@ -7,6 +7,7 @@ use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Process\Process;
 
 abstract class AbstractCommand extends Command
@@ -121,6 +122,71 @@ abstract class AbstractCommand extends Command
 
         $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
         return $containerRunning !== 'false';
+    }
+
+    /**
+     * Check if dinghy ssl certs already exist and ask to enable ssl if they don't
+     */
+    protected function setDinghySSLCerts()
+    {
+        $home = getenv("HOME");
+        if (file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt") && file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key")) {
+            return;
+        }
+
+        if ($this->io->confirm('Do you want to enable SSL for your Apache vhost ?', true)) {
+            $this->createSSLCerts();
+        }
+    }
+
+    protected function createSSLCerts()
+    {
+        //Check if dinghy dir exists
+        if (!file_exists("~/.dinghy/certs/")) {
+            $this->runCommand("mkdir -p ~/.dinghy/certs/");
+        }
+        $sslFilesLocation = $this->getSSLFileLocation();
+        if ($sslFilesLocation) {
+            $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.crt ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt");
+            $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.key ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key");
+        }
+
+    }
+
+    private function getSSLFileLocation()
+    {
+        $question = new Question('What is the location of the SSL cert file and key file ? (Note: the dir should only contain 1 crt and 1 key file)', '/etc/ssl/docker_certs/');
+        $sslFilesLocation = $this->io->askQuestion($question);
+        if (!substr($sslFilesLocation, -1) == '/') {
+            $sslFilesLocation = $sslFilesLocation . '/';
+        }
+        if (!file_exists($sslFilesLocation)) {
+            $this->logError("The location " . $sslFilesLocation . " does not exist");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.crt")) == 0) {
+            $this->logError("There is no crt file available in the location " . $sslFilesLocation . ".");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.crt")) > 1) {
+            $this->logError("There are multiple crt files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.key")) == 0) {
+            $this->logError("There is no key file available in the location " . $sslFilesLocation . ".");
+
+            return false;
+        }
+        if (count(glob($sslFilesLocation . "*.key")) > 1) {
+            $this->logError("There are multiple key files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
+
+            return false;
+        }
+
+        return $sslFilesLocation;
     }
 
     private function checkDockerDaemonIsRunning()

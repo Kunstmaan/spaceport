@@ -12,7 +12,7 @@ services:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
             VIRTUAL_PORT: 80
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
-            HTTPS_METHOD: noredirect
+            HTTPS_METHOD: redirect
             {%- if shuttle.apacheFallbackDomain %}
 
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
