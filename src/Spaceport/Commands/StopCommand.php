@@ -21,7 +21,8 @@ class StopCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if(!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME) || !file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+        $dockerFile = $this->getDockerFile();
+        if(!file_exists($dockerFile)) {
             $this->logError("There is no docker-compose file present. Run `spaceport init` first");
 
             return;
@@ -43,11 +44,8 @@ class StopCommand extends AbstractCommand
     private function stopProjectContainers()
     {
         $this->logStep("Stopping project containers");
-        if ($this->isMacOs() && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
-            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' stop');
-        } else {
-            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' stop');
-        }
+        $dockerFile = $this->getDockerFile();
+        $this->runCommand('docker-compose -f ' . $dockerFile . ' stop');
 
         $this->logSuccess('Docker stopped');
     }

@@ -70,7 +70,8 @@ abstract class AbstractCommand extends Command
      */
     protected function isDockerized($quiet = false)
     {
-        if (!(file_exists(self::DOCKER_COMPOSE_LINUX_FILE_NAME) && file_exists(self::DOCKER_COMPOSE_MAC_FILE_NAME))) {
+        $dockerFile = $this->getDockerFile();
+        if (!file_exists($dockerFile)) {
             if (!$quiet) {
                 $this->logError("There is no docker-compose file present. Run `spaceport init` first");
             }
@@ -151,6 +152,20 @@ abstract class AbstractCommand extends Command
             $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.key ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key");
         }
 
+    }
+
+    protected function getDockerFile()
+    {
+        return $this->isMacOs() ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
+    }
+
+    protected function getDockerFullFileName()
+    {
+        $currentWorkDir = getcwd();
+        $dockerFilePath = $currentWorkDir . DIRECTORY_SEPARATOR;
+        $dockerFile = $this->getDockerFile();
+
+        return $dockerFilePath . $dockerFile;
     }
 
     private function getSSLFileLocation()
