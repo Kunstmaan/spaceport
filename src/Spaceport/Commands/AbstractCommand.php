@@ -66,6 +66,7 @@ abstract class AbstractCommand extends Command
      * Check if the project is ready for docker.
      * Logs an error if the project is not ready for docker.
      *
+     * @param bool $quiet
      * @return true
      */
     protected function isDockerized($quiet = false)
@@ -156,7 +157,7 @@ abstract class AbstractCommand extends Command
 
     protected function getDockerFile()
     {
-        return $this->isMacOs() ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
+        return 'docker-compose.yml';
     }
 
     protected function getDockerFullFileName()

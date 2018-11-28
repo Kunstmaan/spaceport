@@ -68,28 +68,82 @@ class InitCommand extends AbstractCommand
     {
         $this->logStep('Checking if the web/app.php file is setup for Docker');
         if (file_exists("web/app.php") && strpos(file_get_contents("web/app.php"), 'docker') === false) {
-            $this->logWarning('The web/app.php file is not setup for Docker. Change the section where the AppKernel is loaded to look like this:
-
-if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\') {
-    umask(0000);
-    Debug::enable();
-    $kernel = new AppKernel(getenv(\'APP_ENV\'), true);
-} else {
-   $kernel = new AppKernel(\'prod\', false);
-}'
-            );
+            if ($this->io->confirm('The web/app.php file is not setup for Docker. Should I modify it for you? You need to verify after..', false)) {
+                $this->writeAppPhp();
+            }
         }
     }
 
     private function checkAppKernelFile()
     {
         $this->logStep('Checking if the app/AppKernel.php file is setup for Docker');
-        if (file_exists("app/AppKernel.php") && strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
-            $this->logWarning('The app/AppKernel.php file is not setup for Docker. Change the section where the dev and test bundles are loaded to look like this:
 
-if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true)) {'
-            );
+        require getcwd().'/app/autoload.php';
+        include_once getcwd().'/var/bootstrap.php.cache';
+
+        if (file_exists("app/AppKernel.php") && strpos(file_get_contents("app/AppKernel.php"), 'docker') === false) {
+            if ($this->io->confirm('The app/AppKernel.php file is not setup for Docker. Should I modify it for you? You need to verify after..', false)) {
+                $file = \file("app/AppKernel.php");
+                $file = $this->writeLogDir($file);
+                $file = $this->writeCacheDir($file);
+                $contents = implode("", $file);
+                $contents = str_replace('in_array($this->getEnvironment(), array(\'dev\'', 'in_array($this->getEnvironment(), array(\'dev\',\'docker\'', $contents);
+
+                file_put_contents("app/AppKernel.php", $contents);
+            }
         }
+    }
+
+    private function writeAppPhp($filename = 'web/app.php')
+    {
+        $contents = file_get_contents($filename);
+
+        $this->logStep('Modifying '.$filename);
+        $contents = str_replace('if (getenv(\'APP_ENV\') === \'dev\'', 'if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\'', $contents);
+        $contents = str_replace('if (getenv(\'APP_ENV\') !== \'dev\'', 'if (getenv(\'APP_ENV\') !== \'dev\' || getenv(\'APP_ENV\') !== \'docker\'', $contents);
+        file_put_contents($filename, $contents);
+    }
+
+    private function writeLogDir(array $file)
+    {
+        $method = new \ReflectionMethod('AppKernel', 'getLogDir');
+        $slice = array_slice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
+        $contents = implode('', $slice);
+
+        if (strpos($contents, 'docker') === false) {
+            $this->logStep('Modifying the logDir function in AppKernel');
+            $tmp = ["        if (\$this->getEnvironment() === 'docker') {\n          return '/tmp/symfony/var/logs/';\n        }\n\n"];
+            foreach ($slice as $key => $line) {
+                if (strpos($line, '{') !== false) {
+                    $slice = array_merge(array_slice($slice, 0, $key + 1), $tmp, array_slice($slice, $key + 1));
+                    break;
+                }
+            }
+            array_splice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1, $slice);
+        }
+
+        return $file;
+    }
+
+    private function writeCacheDir(array $file)
+    {
+        $method = new \ReflectionMethod('AppKernel', 'getCacheDir');
+        $slice = array_slice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
+        $contents = implode('', $slice);
+
+        if (strpos($contents, 'docker') === false) {
+            $this->logStep('Modifying the cacheDir function in AppKernel');
+            $tmp = ["        if (\$this->getEnvironment() === 'docker') {\n          return '/tmp/symfony/var/cache/';\n        }\n\n"];
+            foreach ($slice as $key => $line) {
+                if (strpos($line, '{') !== false) {
+                    $slice = array_merge(array_slice($slice, 0, $key + 1), $tmp, array_slice($slice, $key + 1));
+                    break;
+                }
+            }
+            array_splice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1, $slice);
+        }
+
+        return $file;
     }
 
     private function writeDockerComposeFile()
@@ -100,8 +154,13 @@ if (in_array($this->getEnvironment(), array(\'dev\', \'test\', \'docker\'), true
         $this->askElasticVersion();
         $this->askNodeVersion();
         $this->logStep('Generating the docker-compose file');
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_LINUX_FILE_NAME, ['shuttle' => $this->shuttle]);
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_MAC_FILE_NAME, ['shuttle' => $this->shuttle]);
+        if ($this->isMacOs()) {
+            $twig = 'symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig';
+        } else {
+            $twig = 'symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig';
+        }
+
+        $this->twig->renderAndWriteTemplate($twig, 'docker-compose.yml', ['shuttle' => $this->shuttle]);
     }
 
     private function findPHPSettings($ask = true)
