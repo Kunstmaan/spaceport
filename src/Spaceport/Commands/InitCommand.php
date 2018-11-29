@@ -152,7 +152,6 @@ class InitCommand extends AbstractCommand
         $this->findApacheSettings();
         $this->findPHPSettings();
         $this->askElasticVersion();
-        $this->askNodeVersion();
         $this->logStep('Generating the docker-compose file');
         if ($this->isMacOs()) {
             $twig = 'symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig';
