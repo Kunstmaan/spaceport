@@ -54,12 +54,6 @@ services:
         image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    node:
-        image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
-        volumes:
-            - "nfsmount:/src"
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.npm:/root/.npm
 
 volumes:
     {% for database in shuttle.databases %}

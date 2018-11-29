@@ -47,17 +47,13 @@ services:
             MYSQL_DATABASE: {{ database.mysqlDatabase }}
             MYSQL_USER: {{ database.mysqlUser }}
             MYSQL_PASSWORD: {{ database.mysqlPassword }}
+        ports:
+            - "33306:3306"
     {% endfor %}
     {{- 'elasticsearch:' }}
         image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    node:
-        image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
-        volumes:
-            - .:/src:rw
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.npm:/root/.npm
 
 volumes:
     {% for database in shuttle.databases %}
