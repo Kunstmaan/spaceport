@@ -54,7 +54,7 @@ class DatabaseCommand extends AbstractCommand
         $this->shuttle->setServer($this->io->askQuestion($question));
         $question = new Question('What is the name of the project?', $this->shuttle->getName());
         $projectName = $this->io->askQuestion($question);
-        $question = new Question('What is the location and filename of the mysql backup ?', sprintf('/home/projects/%s/backup/mysql.dmp.gz', $projectName));
+        $question = new Question('What is the location and filename of the mysql backup ?', sprintf('/opt/projects/%s/backup/mysql.dmp.gz', $projectName));
         $databaseBackupLocationFileName = $this->io->askQuestion($question);
 
         $returnValue = $this->runCommand(sprintf('ssh %s stat %s', $this->shuttle->getServer(), $databaseBackupLocationFileName), null, [], true);
