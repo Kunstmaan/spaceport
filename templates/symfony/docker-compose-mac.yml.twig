@@ -12,7 +12,7 @@ services:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
             VIRTUAL_PORT: 80
             DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
-            HTTPS_METHOD: redirect
+            HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
 
             FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
@@ -33,7 +33,7 @@ services:
             - default
             - isolated_maildev
         environment:
-            APP_ENV: docker
+            APP_ENV: 'docker'
             XDEBUG: 'off'
             XDEBUG_HOST: '10.254.254.254'
     {% for database in shuttle.databases %}
@@ -47,17 +47,13 @@ services:
             MYSQL_DATABASE: {{ database.mysqlDatabase }}
             MYSQL_USER: {{ database.mysqlUser }}
             MYSQL_PASSWORD: {{ database.mysqlPassword }}
+        ports:
+            - "33306:3306"
     {% endfor %}
     {{- 'elasticsearch:' }}
         image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-    node:
-        image: kunstmaan/spaceport-npm:node-{{ shuttle.nodeVersion }}-alpine
-        volumes:
-            - "nfsmount:/src"
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.npm:/root/.npm
 
 volumes:
     {% for database in shuttle.databases %}

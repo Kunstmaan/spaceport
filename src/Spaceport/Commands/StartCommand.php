@@ -6,7 +6,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
 
 class StartCommand extends AbstractCommand
 {
@@ -25,11 +24,9 @@ class StartCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        if ($this->isMacOs() && !file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
-            $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", parent::DOCKER_COMPOSE_MAC_FILE_NAME));
-            exit(1);
-        } else if (!file_exists(parent::DOCKER_COMPOSE_LINUX_FILE_NAME)) {
-            $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", parent::DOCKER_COMPOSE_LINUX_FILE_NAME));
+        $dockerFile = $this->getDockerFullFileName();
+        if (!file_exists($dockerFile)) {
+            $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", $dockerFile));
             exit(1);
         }
 
@@ -62,12 +59,13 @@ class StartCommand extends AbstractCommand
 
     private function startContainers(OutputInterface $output)
     {
-        if ($this->isMacOs() && file_exists(parent::DOCKER_COMPOSE_MAC_FILE_NAME)) {
+        if ($this->isMacOs()) {
             $this->configureNfsExports($output);
-            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' up -d');
-        } else {
-            $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . ' up -d');
         }
+
+        $dockerFile = $this->getDockerFile();
+        $this->runCommand('docker-compose -f ' . $dockerFile . ' up -d');
+
     }
 
     private function startMaildev()

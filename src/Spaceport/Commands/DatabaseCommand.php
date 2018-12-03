@@ -90,6 +90,7 @@ class DatabaseCommand extends AbstractCommand
     private function startDatabase()
     {
         $this->logStep('Starting mysql container');
-        $this->runCommand('docker-compose -f ' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . ' up -d --no-recreate');
+        $dockerFile = $this->getDockerFile();
+        $this->runCommand('docker-compose -f ' . $dockerFile . ' up -d --no-recreate');
     }
 }
