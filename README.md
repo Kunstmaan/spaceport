@@ -1,10 +1,12 @@
 ## Installation
 
-```sh
-wget https://s3-eu-west-1.amazonaws.com/kunstmaan-spaceport/spaceport.phar && \
-    chmod +x spaceport.phar && \
-    mv spaceport.phar /usr/local/bin/spaceport
 ```
+git clone https://github.com/Kunstmaan/spaceport.git /some/path/spaceport
+chmod +x /some/path/spaceport/spaceport
+ln -s /some/path/spaceport/spaceport /usr/local/bin/spaceport   
+```
+
+## Install 
 
 ## BG-sync White- and Black-listing folders for 2 way sync
 
