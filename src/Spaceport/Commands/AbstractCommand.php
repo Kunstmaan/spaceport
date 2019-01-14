@@ -157,7 +157,7 @@ abstract class AbstractCommand extends Command
 
     protected function getDockerFile()
     {
-        return $this->isMacOs() ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
+        return $this->isMacOs() && file_exists(self::DOCKER_COMPOSE_MAC_FILE_NAME) ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
     }
 
     protected function getDockerFullFileName()
