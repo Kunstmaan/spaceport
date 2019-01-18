@@ -24,6 +24,7 @@ services:
             - .:/app:rw
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
+            - ~/.bash_history:/root/.bash_history
         links:
             {% for database in shuttle.databases %}
             {{- '- mysql_' ~ database.mysqlDatabase }}
