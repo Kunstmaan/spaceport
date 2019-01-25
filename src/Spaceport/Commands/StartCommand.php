@@ -30,6 +30,8 @@ class StartCommand extends AbstractCommand
             exit(1);
         }
 
+        $this->isOwnerOfFilesInDirectory();
+
         $clean = $input->getOption('clean');
         if ($clean) {
             $this->logStep("Cleaning containers");

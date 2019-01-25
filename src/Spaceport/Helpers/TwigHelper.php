@@ -1,16 +1,14 @@
 <?php
-namespace Spaceport\Helpers;
 
+namespace Spaceport\Helpers;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TwigHelper
 {
-
     private $twig;
 
     /**
-     * TwigHelper constructor.
      * @param OutputInterface $output
      */
     public function __construct(OutputInterface $output)
@@ -32,11 +30,10 @@ class TwigHelper
      * @param $target
      * @param array $variables
      */
-    public function renderAndWriteTemplate($source, $target, array $variables = array()){
-        $template = $this->twig->loadTemplate( 'templates/'.$source);
+    public function renderAndWriteTemplate($source, $target, array $variables = array())
+    {
+        $template = $this->twig->loadTemplate('templates/' . $source);
         $content = $template->render($variables);
         file_put_contents($target, $content);
     }
-
-
 }

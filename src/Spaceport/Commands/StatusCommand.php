@@ -7,7 +7,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class StatusCommand extends AbstractCommand
 {
-
     protected function configure()
     {
         $this
@@ -44,7 +43,11 @@ class StatusCommand extends AbstractCommand
 
         // Compose files present
         if ($this->isDockerized()) {
-            $this->logSuccess('Docker compose files present');
+            $this->logSuccess('Docker compose file present');
+        }
+
+        if ($this->isOwnerOfFilesInDirectory()) {
+            $this->logSuccess('You are filesystem owner of all files (only root dir checked)');
         }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Spaceport\Commands;
 
 use Spaceport\Model\Shuttle;
@@ -12,9 +13,8 @@ use Symfony\Component\Process\Process;
 
 abstract class AbstractCommand extends Command
 {
-
-    CONST DOCKER_COMPOSE_LINUX_FILE_NAME="docker-compose.yml";
-    CONST DOCKER_COMPOSE_MAC_FILE_NAME="docker-compose-mac.yml";
+    CONST DOCKER_COMPOSE_LINUX_FILE_NAME = "docker-compose.yml";
+    CONST DOCKER_COMPOSE_MAC_FILE_NAME = "docker-compose-mac.yml";
 
     use TwigTrait;
     use IOTrait;
@@ -24,7 +24,8 @@ abstract class AbstractCommand extends Command
      */
     protected $shuttle;
 
-    protected function execute(InputInterface $input, OutputInterface $output){
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->setUpIO($input, $output);
         $this->setUpTwig($output);
 
@@ -104,6 +105,7 @@ abstract class AbstractCommand extends Command
         $process = new Process('sudo nfsd status | grep "not running"');
         $process->start();
         $process->wait();
+
         return empty($process->getOutput());
     }
 
@@ -167,6 +169,30 @@ abstract class AbstractCommand extends Command
         $dockerFile = $this->getDockerFile();
 
         return $dockerFilePath . $dockerFile;
+    }
+
+    /**
+     * Check that the current user is owner of the files. If not this might give problems with the NFS mount
+     * because the local user is mapped to the root user in the docker container.
+     * This function only checks in the root directory.
+     */
+    protected function isOwnerOfFilesInDirectory()
+    {
+        $uid = $this->runCommand('id -u');
+        $path = getcwd();
+        $files = scandir($path);
+        foreach ($files as $file) {
+            if (!in_array($file, ['.', '..'])) {
+                $info = stat( $path . '/' . $file);
+                $fileUid = $info[4];
+                if ($fileUid != $uid) {
+                    $this->logWarning("You are not the filesystem owner of some files/directories in the project. This might give problems with the NFS mount.");
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private function getSSLFileLocation()
@@ -235,7 +261,7 @@ abstract class AbstractCommand extends Command
         $process->wait();
         $processes = $process->getOutput();
         if (!empty($processes)) {
-            $this->logError('Apache seems to be running. Please shutdown apache and rerun your command.');
+            $this->logError('Apache seems to be running. Please shutdown apache and re-run your command.');
             // Only exit on spaceport start
             if ($this instanceof StartCommand) {
                 exit(1);

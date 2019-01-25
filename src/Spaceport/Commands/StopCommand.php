@@ -4,11 +4,9 @@ namespace Spaceport\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Yaml\Yaml;
 
 class StopCommand extends AbstractCommand
 {
-
     protected function configure()
     {
         $this
@@ -22,13 +20,13 @@ class StopCommand extends AbstractCommand
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
         $dockerFile = $this->getDockerFile();
-        if(!file_exists($dockerFile)) {
+        if (!file_exists($dockerFile)) {
             $this->logError("There is no docker-compose file present. Run `spaceport init` first");
 
             return;
         }
 
-        if($input->getOption('all')) {
+        if ($input->getOption('all')) {
             $this->stopAllContainers();
         } else {
             $this->stopProjectContainers();
