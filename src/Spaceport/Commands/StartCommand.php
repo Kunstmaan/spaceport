@@ -109,7 +109,7 @@ class StartCommand extends AbstractCommand
         }
 
         //Check if http-proxy is running
-        if ($this->isProxyRunning($containerId)) {
+        if (!$this->isProxyRunning($containerId)) {
             $this->logStep("Starting proxy");
             $this->runCommand('docker start ' . $containerId);
         } else {
