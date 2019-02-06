@@ -39,22 +39,8 @@ class InitCommand extends AbstractCommand
         $this->checkAppFile();
         $this->checkAppKernelFile();
         $this->setDinghySSLCerts();
-        $this->fetchDatabase($output);
         $this->logSuccess("You can now run `spaceport start` to run the development environment");
         $this->io->newLine();
-    }
-
-    private function fetchDatabase(OutputInterface $output)
-    {
-        if ($this->io->confirm('Should I fetch the database from your server?', false)) {
-
-            $command = $this->getApplication()->find("db");
-
-            $arguments = ['command' => 'db', '--fetch' => true];
-
-            $dbInput = new ArrayInput($arguments);
-            $command->run($dbInput, $output);
-        }
     }
 
     private function writeConfigDockerFile()
@@ -192,7 +178,7 @@ class InitCommand extends AbstractCommand
         $this->shuttle->setApacheDocumentRoot($this->io->askQuestion($question));
         $question = new Question('What server should be used as the fallback domain ? (Can be left empty)', '/');
         $fallbackDomain = $this->io->askQuestion($question);
-        $fallbackDomain = preg_replace('#^https?://#', '', rtrim($fallbackDomain,'/'));
+        $fallbackDomain = preg_replace('#^https?://#', '', rtrim($fallbackDomain, '/'));
         $this->shuttle->setApacheFallbackDomain($fallbackDomain);
         $this->shuttle->setApacheVhost($this->shuttle->getName() . Shuttle::DOCKER_EXT);
     }
@@ -214,8 +200,7 @@ class InitCommand extends AbstractCommand
             return;
         }
 
-        if (
-            !array_key_exists('database_name', $parameters['parameters']) &&
+        if (!array_key_exists('database_name', $parameters['parameters']) &&
             !array_key_exists('database_user', $parameters['parameters']) &&
             !array_key_exists('database_password', $parameters['parameters'])) {
             $question = new Question('How many databases do you want to configure?', 1);
