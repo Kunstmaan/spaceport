@@ -139,13 +139,9 @@ class InitCommand extends AbstractCommand
         $this->findPHPSettings();
         $this->askElasticVersion();
         $this->logStep('Generating the docker-compose file');
-        if ($this->isMacOs()) {
-            $twig = 'symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig';
-        } else {
-            $twig = 'symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig';
-        }
 
-        $this->twig->renderAndWriteTemplate($twig, 'docker-compose.yml', ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_LINUX_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_MAC_FILE_NAME, ['shuttle' => $this->shuttle]);
     }
 
     private function findPHPSettings($ask = true)
