@@ -14,6 +14,7 @@ class CleanCommand extends AbstractCommand
         $this
             ->setName('clean')
             ->addOption('images', 'i', InputOption::VALUE_NONE, 'Remove images')
+            ->addOption('volumes', 'o', InputOption::VALUE_NONE, 'Remove volumes')
             ->addOption('all', 'a', InputOption::VALUE_NONE, 'Remove everything')
             ->setDescription('Clean docker containers, images and volumes')
         ;
@@ -22,13 +23,14 @@ class CleanCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        $output = $this->runCommand('docker ps -a -f status=exited -q', null, [], true);
+        $output = $this->runCommand('docker ps -a -f status=exited -f status=created -q', null, [], true);
         if (!empty($output)) {
-            $this->runCommand('docker rm $(docker ps -a -f status=exited -q)');
+            $this->runCommand('docker rm $(docker ps -a -f status=exited -f status=created -q)');
         }
         $this->runCommand('docker network prune -f');
 
         $removeImages = $input->getOption('images');
+        $removeVolumes = $input->getOption('volumes');
         $removeAll = $input->getOption('all');
         if ($removeAll) {
             $output = $this->runCommand('docker images -a -q', null, [], true);
@@ -49,6 +51,12 @@ class CleanCommand extends AbstractCommand
             }
         }
 
+        if (!$removeAll && $removeVolumes) {
+            $output = $this->runCommand('docker volume ls -q', null, [], true);
+            if (!empty($output)) {
+                $this->runCommand('docker volume rm $(docker volume ls -q)');
+            }
+        }
 
         $this->logSuccess('All gone :)');
     }
