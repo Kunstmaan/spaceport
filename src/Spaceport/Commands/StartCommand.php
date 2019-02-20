@@ -52,11 +52,36 @@ class StartCommand extends AbstractCommand
     {
         $this->logStep("Building required containers");
         $this->startMaildev();
+        $this->tryToPrepDatabase();
         $this->startContainers($output);
         $this->startProxy();
         $this->copyApacheConfig();
         $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
         $this->logSuccess($text);
+    }
+
+    private function tryToPrepDatabase()
+    {
+        $this->logStep("Prepping database entrypoint if necessary");
+        $currentWorkDir = getcwd();
+        $synFilePath = $currentWorkDir . DIRECTORY_SEPARATOR;
+        $syncFile = $synFilePath . 'sync.sh';
+        $this->logStep('Looking for sync file here:' . $syncFile);
+        if (!file_exists($syncFile)) {
+            $this->logStep("No sync file in project -- Skipping");
+            return;
+        }
+
+        $home = getenv("HOME");
+        $projectName = $this->shuttle->getName();
+        $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
+        $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
+        if((count(glob("$sqlDir/*")) !== 0)) {
+            $this->logStep("Database entrypoint already on pc --Skipping");
+            return;
+        }
+
+        $this->runCommand('echo | sh ' . $syncFile);
     }
 
     private function startContainers(OutputInterface $output)
