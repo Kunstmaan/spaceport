@@ -2,6 +2,7 @@
 
 namespace Spaceport\Commands;
 
+use josegonzalez\Dotenv\Loader;
 use Spaceport\Exceptions\NotASymfonyProjectException;
 use Spaceport\Model\DatabaseConnection;
 use Spaceport\Model\Shuttle;
@@ -184,12 +185,17 @@ class InitCommand extends AbstractCommand
      */
     private function findMySQLSettings()
     {
-        $parametersFile = 'app/config/parameters.yml';
-        $oldParametersFile = 'app/config/parameters.ini';
+        $parametersFile = 'config/packages/parameters.yml';
+        $oldParametersFile = 'app/config/parameters.yml';
+        $oldOldParametersFile = 'app/config/parameters.ini';
         if (file_exists($parametersFile)) {
+        } elseif (file_exists($oldParametersFile)) {
             $yaml = new Parser();
             $parameters = $yaml->parse(file_get_contents($parametersFile));
         } elseif (file_exists($oldParametersFile)) {
+            $yaml = new Parser();
+            $parameters = $yaml->parse(file_get_contents($oldParametersFile));
+        } elseif (file_exists($oldOldParametersFile)) {
             $parameters = parse_ini_file($oldParametersFile, true);
         } else {
             $this->io->writeln("No parameters.yml or parameters.ini file found at " . $parametersFile);
