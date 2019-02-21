@@ -56,32 +56,23 @@ class StartCommand extends AbstractCommand
         $this->startContainers($output);
         $this->startProxy();
         $this->copyApacheConfig();
+        $this->runComposerInstall();
         $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
         $this->logSuccess($text);
     }
 
     private function tryToPrepDatabase()
     {
-        $this->logStep("Prepping database entrypoint if necessary");
-        $currentWorkDir = getcwd();
-        $synFilePath = $currentWorkDir . DIRECTORY_SEPARATOR;
-        $syncFile = $synFilePath . 'sync.sh';
-        $this->logStep('Looking for sync file here:' . $syncFile);
-        if (!file_exists($syncFile)) {
-            $this->logStep("No sync file in project -- Skipping");
-            return;
-        }
-
         $home = getenv("HOME");
         $projectName = $this->shuttle->getName();
         $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
         $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
-        if((count(glob("$sqlDir/*")) !== 0)) {
-            $this->logStep("Database entrypoint already on pc --Skipping");
-            return;
+        if((count(glob("$sqlDir/*")) == 0)) {
+            $this->logStep("Database entrypoint not yet on pc --Syncing");
+            if (`which dsync`) {
+                $this->runCommand("dsync db --only-fetch-db", null, [], true);
+            }
         }
-
-        $this->runCommand('echo | sh ' . $syncFile);
     }
 
     private function startContainers(OutputInterface $output)
@@ -147,12 +138,26 @@ class StartCommand extends AbstractCommand
         $apacheConfigFile = 'docker-apache.conf';
         if (file_exists($apacheConfigFile)) {
             $this->logStep("Docker Apache config find. Going to swap the default.");
-            $containerId = $this->runCommand('docker-compose ps -q apache');
+            $containerId = $this->runCommand('docker-compose -f ' . $this->getDockerFile() . ' ps -q apache');
             if (!empty($containerId)) {
                 $this->logStep("Swapping default Apache config with docker-apache.conf file");
                 $this->runCommand('docker cp docker-apache.conf ' . $containerId . ":/etc/apache2/sites-available/000-default.conf");
             } else {
                 $this->logWarning("No running Apache container found!.");
+            }
+        }
+    }
+
+    private function runComposerInstall()
+    {
+        if (file_exists("composer.json") && !file_exists("vendor")) {
+            $this->logStep("composer.json file found but no vendor dir. Trying to run composer install");
+            $containerId = $this->runCommand("docker-compose -f " . $this->getDockerFile() . " ps -q php");
+            if (!empty($containerId)) {
+                $this->logStep("Running composer install");
+                $this->runCommand("docker exec " . $containerId . " composer install");
+            } else {
+                $this->logWarning("No running Php container found!.");
             }
         }
     }
