@@ -57,6 +57,7 @@ class StartCommand extends AbstractCommand
         $this->startProxy();
         $this->copyApacheConfig();
         $this->runComposerInstall();
+        $this->runBuildUI();
         $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
         $this->logSuccess($text);
     }
@@ -159,6 +160,14 @@ class StartCommand extends AbstractCommand
             } else {
                 $this->logWarning("No running Php container found!.");
             }
+        }
+    }
+
+    private function runBuildUI()
+    {
+        if (file_exists("buildUI.sh") && !file_exists("node_modules")) {
+            $this->logStep("buildUI.sh file found but no node_modules dir. Trying to run buildUI script");
+            $this->runCommand("bash buildUI.sh");
         }
     }
 
