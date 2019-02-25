@@ -189,14 +189,13 @@ class InitCommand extends AbstractCommand
         $oldParametersFile = 'app/config/parameters.yml';
         $oldOldParametersFile = 'app/config/parameters.ini';
         if (file_exists($parametersFile)) {
-        } elseif (file_exists($oldParametersFile)) {
             $yaml = new Parser();
             $parameters = $yaml->parse(file_get_contents($parametersFile));
         } elseif (file_exists($oldParametersFile)) {
             $yaml = new Parser();
             $parameters = $yaml->parse(file_get_contents($oldParametersFile));
         } elseif (file_exists($oldOldParametersFile)) {
-            $parameters = parse_ini_file($oldParametersFile, true);
+            $parameters = parse_ini_file($oldOldParametersFile, true);
         } else {
             $this->io->writeln("No parameters.yml or parameters.ini file found at " . $parametersFile);
             return;
