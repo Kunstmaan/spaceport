@@ -1,0 +1,15 @@
+imports:
+    - { resource: '../dev/debug.yaml'}
+    - { resource: '../dev/easy_log_handler.yaml' }
+    - { resource: '../dev/monolog.yaml' }
+    - { resource: '../dev/routing.yaml' }
+    - { resource: '../dev/web_profiler.yaml'}
+
+swiftmailer:
+    transport: "smtp"
+    host: "maildev"
+    port: 25
+
+parameters:
+    kunstmaan_search.hostname: "elasticsearch"
+    kunstmaan_search.port: 9200
