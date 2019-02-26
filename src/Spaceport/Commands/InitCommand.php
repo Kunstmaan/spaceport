@@ -2,11 +2,9 @@
 
 namespace Spaceport\Commands;
 
-use Spaceport\Exceptions\NotASymfonyProjectException;
 use Spaceport\Helpers\Sf3InitInitHelper;
 use Spaceport\Helpers\Sf4InitInitHelper;
 use Spaceport\Helpers\SfInitHelper;
-use Spaceport\Model\DatabaseConnection;
 use Spaceport\Model\Shuttle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
