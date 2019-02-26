@@ -10,7 +10,7 @@ class Sf3InitInitHelper extends SfInitHelper
 
     public function getConfigDockerFilePath()
     {
-        return "config/config_docker.yml";
+        return "app/config/config_docker.yml";
     }
 
     public function getTwigTemplateNameConfigDockerFile()
@@ -36,7 +36,7 @@ class Sf3InitInitHelper extends SfInitHelper
 
     public function getApacheDocumentRoot()
     {
-        "web";
+        return "web";
     }
 
     public function dockerizeApp()
