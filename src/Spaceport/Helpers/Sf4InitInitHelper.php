@@ -40,8 +40,6 @@ class Sf4InitInitHelper extends SfInitHelper
     {
         $this->logStep('Checking if the config/bundles.php file is setup for Docker');
 
-        require getcwd().'/vendor/autoload.php';
-
         if (file_exists("config/bundles.php")) {
             $file = \file("config/bundles.php");
 

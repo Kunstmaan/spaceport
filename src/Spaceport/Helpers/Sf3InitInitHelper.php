@@ -48,19 +48,25 @@ class Sf3InitInitHelper extends SfInitHelper
     private function checkAppFile()
     {
         $this->logStep('Checking if the web/app.php file is setup for Docker');
-        if (file_exists("web/app.php") && strpos(file_get_contents("web/app.php"), 'docker') === false) {
-            if ($this->io->confirm('The web/app.php file is not setup for Docker. Should I modify it for you? You need to verify after..', false)) {
-                $this->writeAppPhp();
-            }
-        }
-    }
 
-    private function writeAppPhp($filename = 'web/app.php')
-    {
-        $contents = file_get_contents($filename);
-        $contents = str_replace('if (getenv(\'APP_ENV\') === \'dev\'', 'if (getenv(\'APP_ENV\') === \'dev\' || getenv(\'APP_ENV\') === \'docker\'', $contents);
-        $contents = str_replace('if (getenv(\'APP_ENV\') !== \'dev\'', 'if (getenv(\'APP_ENV\') !== \'dev\' || getenv(\'APP_ENV\') !== \'docker\'', $contents);
-        file_put_contents($filename, $contents);
+        if (file_exists("web/app.php")) {
+            $file = \file("web/app.php");
+
+            foreach ($file as $key => $line) {
+                if (preg_match("/getenv\('APP_ENV'\) === ['|\"]dev['|\"](.*)/", $line, $matches) && strpos($line, "docker") === false) {
+                    $match = $matches[0];
+                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') === 'docker'" . substr($match, -3), -3);
+                    $file[$key] = str_replace($match, $matchReplace, $file[$key]);
+                }
+                if (preg_match("/getenv\('APP_ENV'\) !== ['|\"]dev['|\"](.*)/", $line, $matches) && strpos($line, "docker") === false) {
+                    $match = $matches[0];
+                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') !== 'docker'" . substr($match, -3), -3);
+                    $file[$key] = str_replace($match, $matchReplace, $file[$key]);
+                }
+            }
+
+            file_put_contents("web/app.php", implode("", $file));
+        }
     }
 
     private function checkAppKernelFile()
@@ -99,12 +105,12 @@ class Sf3InitInitHelper extends SfInitHelper
 
     private function writeLogDir(array $file)
     {
-        $this->writeDir("AppKernel", "getLogDir", $file, "/tmp/symfony/var/logs/");
+        return $this->writeDir("AppKernel", "getLogDir", $file, "/tmp/symfony/var/logs/");
     }
 
     private function writeCacheDir(array $file)
     {
-        $this->writeDir("AppKernel", "getCacheDir", $file, "/tmp/symfony/var/cache/");
+        return $this->writeDir("AppKernel", "getCacheDir", $file, "/tmp/symfony/var/cache/");
     }
 
 }
