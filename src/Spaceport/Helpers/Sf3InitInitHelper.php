@@ -26,9 +26,9 @@ class Sf3InitInitHelper extends SfInitHelper
         if (array_key_exists('database_name', $parameters['parameters']) &&
             array_key_exists('database_user', $parameters['parameters']) &&
             array_key_exists('database_password', $parameters['parameters'])) {
-            $databaseSettings[] = $parameters["parameters"]["database_name"];
-            $databaseSettings[] = $parameters["parameters"]["database_user"];
-            $databaseSettings[] = $parameters["parameters"]["database_password"];
+            $databaseSettings["database_name"] = $parameters["parameters"]["database_name"];
+            $databaseSettings["database_user"] = $parameters["parameters"]["database_user"];
+            $databaseSettings["database_password"] = $parameters["parameters"]["database_password"];
         }
 
         return $databaseSettings;
