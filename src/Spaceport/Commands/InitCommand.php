@@ -42,7 +42,7 @@ class InitCommand extends AbstractCommand
         } else if ($symfonyVersion == "sf4") {
             $this->initHelper = new Sf4InitInitHelper($input, $output);
         } else {
-            $this->logError("Unknown Symfony version " . $symfonyVersion);
+            $this->logError("Unknown Symfony version " . $symfonyVersion . ". Available options are sf3 or sf4.");
             exit(1);
         }
 
