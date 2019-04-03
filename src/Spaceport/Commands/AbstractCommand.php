@@ -13,8 +13,7 @@ use Symfony\Component\Process\Process;
 
 abstract class AbstractCommand extends Command
 {
-    CONST DOCKER_COMPOSE_LINUX_FILE_NAME = "docker-compose.yml";
-    CONST DOCKER_COMPOSE_MAC_FILE_NAME = "docker-compose-mac.yml";
+    CONST DOCKER_COMPOSE_FILE_NAME = "docker-compose.yml";
 
     use TwigTrait;
     use IOTrait;
@@ -72,7 +71,7 @@ abstract class AbstractCommand extends Command
      */
     protected function isDockerized($quiet = false)
     {
-        $dockerFile = $this->getDockerFile();
+        $dockerFile = $this->getDockerComposeFileName();
         if (!file_exists($dockerFile)) {
             if (!$quiet) {
                 $this->logError("There is no docker-compose file present. Run `spaceport init` first");
@@ -157,16 +156,16 @@ abstract class AbstractCommand extends Command
 
     }
 
-    protected function getDockerFile()
+    protected function getDockerComposeFileName()
     {
-        return $this->isMacOs() && file_exists(self::DOCKER_COMPOSE_MAC_FILE_NAME) ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
+        return self::DOCKER_COMPOSE_FILE_NAME;
     }
 
-    protected function getDockerFullFileName()
+    protected function getDockerComposeFullFileName()
     {
         $currentWorkDir = getcwd();
         $dockerFilePath = $currentWorkDir . DIRECTORY_SEPARATOR;
-        $dockerFile = $this->getDockerFile();
+        $dockerFile = $this->getDockerComposeFileName();
 
         return $dockerFilePath . $dockerFile;
     }

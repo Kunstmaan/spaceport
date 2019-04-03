@@ -6,7 +6,6 @@ use Spaceport\Helpers\Sf3InitInitHelper;
 use Spaceport\Helpers\Sf4InitInitHelper;
 use Spaceport\Helpers\SfInitHelper;
 use Spaceport\Model\Shuttle;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -62,8 +61,7 @@ class InitCommand extends AbstractCommand
         $this->askElasticVersion();
         $this->logStep('Generating the docker-compose file');
 
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_LINUX_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_LINUX_FILE_NAME, ['shuttle' => $this->shuttle]);
-        $this->twig->renderAndWriteTemplate('symfony/' . parent::DOCKER_COMPOSE_MAC_FILE_NAME . '.twig', parent::DOCKER_COMPOSE_MAC_FILE_NAME, ['shuttle' => $this->shuttle]);
+        $this->twig->renderAndWriteTemplate('symfony/' . $this->getDockerComposeFileName() . '.twig', $this->getDockerComposeFileName(), ['shuttle' => $this->shuttle]);
     }
 
     private function findApacheSettings()

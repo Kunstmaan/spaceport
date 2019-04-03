@@ -24,7 +24,7 @@ class StartCommand extends AbstractCommand
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        $dockerFile = $this->getDockerFullFileName();
+        $dockerFile = $this->getDockerComposeFullFileName();
         if (!file_exists($dockerFile)) {
             $this->logError(sprintf("There is no %s file present. Run `spaceport init` first", $dockerFile));
             exit(1);
@@ -78,11 +78,7 @@ class StartCommand extends AbstractCommand
 
     private function startContainers(OutputInterface $output)
     {
-        if ($this->isMacOs()) {
-            $this->configureNfsExports($output);
-        }
-
-        $dockerFile = $this->getDockerFile();
+        $dockerFile = $this->getDockerComposeFileName();
         $this->runCommand('docker-compose -f ' . $dockerFile . ' up -d');
 
     }
@@ -139,7 +135,7 @@ class StartCommand extends AbstractCommand
         $apacheConfigFile = 'docker-apache.conf';
         if (file_exists($apacheConfigFile)) {
             $this->logStep("Docker Apache config find. Going to swap the default.");
-            $containerId = $this->runCommand('docker-compose -f ' . $this->getDockerFile() . ' ps -q apache');
+            $containerId = $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' ps -q apache');
             if (!empty($containerId)) {
                 $this->logStep("Swapping default Apache config with docker-apache.conf file");
                 $this->runCommand('docker cp docker-apache.conf ' . $containerId . ":/etc/apache2/sites-available/000-default.conf");
@@ -153,7 +149,7 @@ class StartCommand extends AbstractCommand
     {
         if (file_exists("composer.json") && !file_exists("vendor")) {
             $this->logStep("composer.json file found but no vendor dir. Trying to run composer install");
-            $containerId = $this->runCommand("docker-compose -f " . $this->getDockerFile() . " ps -q php");
+            $containerId = $this->runCommand("docker-compose -f " . $this->getDockerComposeFileName() . " ps -q php");
             if (!empty($containerId)) {
                 $this->logStep("Running composer install");
                 $this->runCommand("docker exec " . $containerId . " composer install");
@@ -171,47 +167,4 @@ class StartCommand extends AbstractCommand
         }
     }
 
-    private function configureNfsExports(OutputInterface $output)
-    {
-        $command = $this->getApplication()->find('setup-nfs');
-        $command->run(new ArrayInput([]), $output);
-
-        $projectRoot = getcwd();
-        $uid = $this->runCommand('id -u');
-        $gid = $this->runCommand('stat -f \'%g\' /etc/exports');
-
-        $projectExportsConfig = sprintf('\"%s\" localhost -alldirs -mapall=%s:%s', $projectRoot, $uid, $gid);
-
-        if ($this->runCommand(sprintf('grep -qF -- "%s" "/etc/exports"', $projectExportsConfig), null, [], true) === false) {
-            $lines = sprintf('# SPACEPORT-BEGIN: %s %s', $uid, $projectRoot) . '\n';
-            $lines .= $projectExportsConfig . '\n';
-            $lines .= sprintf('# SPACEPORT-END: %s %s', $uid, $projectRoot) . '\n';
-
-            if ($this->runCommand(sprintf('echo "%s" | sudo tee -a /etc/exports', $lines), null, [], true) === false) {
-                $this->logError('Unable to setup nfs exports config for project');
-                exit(1);
-            }
-
-            $this->logStep('Nfs config change done. Restarting docker..');
-
-            $this->runCommand('sudo nfsd restart');
-            $this->runCommand('osascript -e \'quit app "Docker"\'');
-            $this->runCommand('open -a Docker');
-
-            $process = new Process('while ! docker ps > /dev/null 2>&1 ; do sleep 2; done');
-            $process->start();
-            $process->wait();
-
-            $this->logStep('Docker restarted...');
-        }
-
-        $process = new Process('sudo nfsd status');
-        $process->start();
-        $process->wait();
-        $status = $process->getOutput();
-        if (false !== strpos($status, 'nfsd is not running')) {
-            $this->runCommand('sudo nfsd start');
-            $this->logStep('Nfsd started...');
-        }
-    }
 }
