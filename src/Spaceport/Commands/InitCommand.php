@@ -23,7 +23,6 @@ class InitCommand extends AbstractCommand
         $this
             ->setName('init')
             ->setDescription('Initialize the project to run with docker')
-            ->addArgument('symfony_version', InputArgument::REQUIRED, 'The version of symfony.')
             ->addOption('force', null, InputOption::VALUE_OPTIONAL, 'Force the regeneration of the docker files');
     }
 
@@ -36,14 +35,11 @@ class InitCommand extends AbstractCommand
      */
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $symfonyVersion = $input->getArgument("symfony_version");
-        if ($symfonyVersion == "sf3") {
+        $symfonyVersion = $this->io->choice('What version of Symfony do you need?', ['3', '4'], '3');
+        if ($symfonyVersion == "3") {
             $this->initHelper = new Sf3InitInitHelper($input, $output);
-        } else if ($symfonyVersion == "sf4") {
+        } else if ($symfonyVersion == "4") {
             $this->initHelper = new Sf4InitInitHelper($input, $output);
-        } else {
-            $this->logError("Unknown Symfony version " . $symfonyVersion . ". Available options are sf3 or sf4.");
-            exit(1);
         }
 
         if (!$this->isDockerized(true) || $input->getOption('force')) {
