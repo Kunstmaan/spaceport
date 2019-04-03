@@ -29,9 +29,15 @@ class TwigHelper
      * @param $source
      * @param $target
      * @param array $variables
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
      */
     public function renderAndWriteTemplate($source, $target, array $variables = array())
     {
+        if(!file_exists(dirname($target))) {
+            mkdir(dirname($target), 0755, true);
+        }
         $template = $this->twig->loadTemplate('templates/' . $source);
         $content = $template->render($variables);
         file_put_contents($target, $content);
