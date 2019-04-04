@@ -74,7 +74,11 @@ class Sf3InitInitHelper extends SfInitHelper
         $this->logStep('Checking if the app/AppKernel.php file is setup for Docker');
 
         require getcwd().'/app/autoload.php';
-        include_once getcwd().'/var/bootstrap.php.cache';
+        if (file_exists(getcwd().'/var/bootstrap.php.cache')) {
+            include_once getcwd().'/var/bootstrap.php.cache';
+        } elseif (file_exists(getcwd().'/app/bootstrap.php.cache')) {
+            include_once getcwd().'/app/bootstrap.php.cache';
+        }
 
         if (file_exists("app/AppKernel.php")) {
             $file = $this->writeRegisterBundles(\file("app/AppKernel.php"));
