@@ -1,10 +1,8 @@
-version: '3'
+version: '3.7'
 
 services:
     apache:
         image: kunstmaan/spaceport-apache
-        links:
-            - php
         volumes:
             - .:/app:cached
         hostname: {{ shuttle.apacheVhost }}
@@ -21,7 +19,7 @@ services:
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes:
-            - .:/app:rw
+            - .:/app:cached
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
             - ~/.bash_history:/root/.bash_history
