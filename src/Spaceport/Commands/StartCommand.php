@@ -78,8 +78,11 @@ class StartCommand extends AbstractCommand
 
     private function startContainers(OutputInterface $output)
     {
-        $dockerFile = $this->getDockerComposeFileName();
-        $this->runCommand('docker-compose -f ' . $dockerFile . ' up -d');
+        if ($this->isMacOs()) {
+            $this->configureNfsExports($output);
+        }
+
+        $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' up -d');
 
     }
 
@@ -167,4 +170,47 @@ class StartCommand extends AbstractCommand
         }
     }
 
+    private function configureNfsExports(OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('setup-nfs');
+        $command->run(new ArrayInput([]), $output);
+
+        $projectRoot = getcwd();
+        $uid = $this->runCommand('id -u');
+        $gid = $this->runCommand('stat -f \'%g\' /etc/exports');
+
+        $projectExportsConfig = sprintf('\"%s\" localhost -alldirs -mapall=%s:%s', $projectRoot, $uid, $gid);
+
+        if ($this->runCommand(sprintf('grep -qF -- "%s" "/etc/exports"', $projectExportsConfig), null, [], true) === false) {
+            $lines = sprintf('# SPACEPORT-BEGIN: %s %s', $uid, $projectRoot) . '\n';
+            $lines .= $projectExportsConfig . '\n';
+            $lines .= sprintf('# SPACEPORT-END: %s %s', $uid, $projectRoot) . '\n';
+
+            if ($this->runCommand(sprintf('echo "%s" | sudo tee -a /etc/exports', $lines), null, [], true) === false) {
+                $this->logError('Unable to setup nfs exports config for project');
+                exit(1);
+            }
+
+            $this->logStep('Nfs config change done. Restarting docker..');
+
+            $this->runCommand('sudo nfsd restart');
+            $this->runCommand('osascript -e \'quit app "Docker"\'');
+            $this->runCommand('open -a Docker');
+
+            $process = new Process('while ! docker ps > /dev/null 2>&1 ; do sleep 2; done');
+            $process->start();
+            $process->wait();
+
+            $this->logStep('Docker restarted...');
+        }
+
+        $process = new Process('sudo nfsd status');
+        $process->start();
+        $process->wait();
+        $status = $process->getOutput();
+        if (false !== strpos($status, 'nfsd is not running')) {
+            $this->runCommand('sudo nfsd start');
+            $this->logStep('Nfsd started...');
+        }
+    }
 }

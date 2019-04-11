@@ -28,5 +28,6 @@ $app->add(new Spaceport\Commands\StatusCommand());
 $app->add(new Spaceport\Commands\SslCommand());
 $app->add(new Spaceport\Commands\DestroyCommand());
 $app->add(new Spaceport\Commands\CleanCommand());
+$app->add(new Spaceport\Commands\SetupNfsCommand());
 
 $app->run();

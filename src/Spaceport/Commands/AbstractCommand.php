@@ -14,6 +14,7 @@ use Symfony\Component\Process\Process;
 abstract class AbstractCommand extends Command
 {
     CONST DOCKER_COMPOSE_FILE_NAME = "docker-compose.yml";
+    CONST DOCKER_COMPOSE_MAC_FILE_NAME = "docker-compose-mac.yml";
 
     use TwigTrait;
     use IOTrait;
@@ -158,7 +159,7 @@ abstract class AbstractCommand extends Command
 
     protected function getDockerComposeFileName()
     {
-        return self::DOCKER_COMPOSE_FILE_NAME;
+        return $this->isMacOs() ? self::DOCKER_COMPOSE_MAC_FILE_NAME : self::DOCKER_COMPOSE_LINUX_FILE_NAME;
     }
 
     protected function getDockerComposeFullFileName()
