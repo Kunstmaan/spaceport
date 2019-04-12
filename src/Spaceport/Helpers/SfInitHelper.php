@@ -51,7 +51,7 @@ abstract class SfInitHelper
             for ($i = 0; $i < $loops; $i++) {
                 $this->io->writeln(sprintf('Configuring database %d:', $i+1));
                 $databaseConnection = new DatabaseConnection();
-                $question = new Question('What is the database name?');
+                $question = new Question('What is the database name?', $shuttle->getName());
                 $db_name = $this->io->askQuestion($question);
                 $databaseConnection->setMysqlDatabase($db_name);
                 $question = new Question('What is the database user?', $db_name);
