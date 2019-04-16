@@ -15,6 +15,7 @@ abstract class AbstractCommand extends Command
 {
     CONST DOCKER_COMPOSE_FILE_NAME = "docker-compose.yml";
     CONST DOCKER_COMPOSE_MAC_FILE_NAME = "docker-compose-mac.yml";
+    CONST DINGHY_CERTS_DIR_PATH = "~/.dinghy/certs/";
 
     use TwigTrait;
     use IOTrait;
@@ -146,13 +147,15 @@ abstract class AbstractCommand extends Command
     protected function createSSLCerts()
     {
         //Check if dinghy dir exists
-        if (!file_exists("~/.dinghy/certs/")) {
-            $this->runCommand("mkdir -p ~/.dinghy/certs/");
+        if (!file_exists(self::DINGHY_CERTS_DIR_PATH)) {
+            $this->runCommand("mkdir -p " . self::DINGHY_CERTS_DIR_PATH);
         }
-        $sslFilesLocation = $this->getSSLFileLocation();
-        if ($sslFilesLocation) {
-            $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.crt ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt");
-            $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesLocation . "*.key ~/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key");
+        $sslFilesPath = $this->getSSLFilesPaths();
+        if ($sslFilesPath) {
+            foreach (["crt", "key"] as $extension) {
+                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesPath[$extension] . " " . self::DINGHY_CERTS_DIR_PATH . "dinghy." . $extension . " 2>/dev/null", null, [], true);
+                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" ln -sf dinghy." . $extension . " " . self::DINGHY_CERTS_DIR_PATH . $this->shuttle->getApacheVhost() . "." . $extension);
+            }
         }
 
     }
@@ -195,40 +198,30 @@ abstract class AbstractCommand extends Command
         return true;
     }
 
-    private function getSSLFileLocation()
+    /**
+     * Ask about the paths for the ssl crt and key files.
+     * Returns false if a path does not exists. Otherwise it returns a key value array of the crt and key path.
+     *
+     * @return array|bool
+     */
+    private function getSSLFilesPaths()
     {
-        $question = new Question('What is the location of the SSL cert file and key file ? (Note: the dir should only contain 1 crt and 1 key file)', '/etc/ssl/docker_certs/');
-        $sslFilesLocation = $this->io->askQuestion($question);
-        if (!substr($sslFilesLocation, -1) == '/') {
-            $sslFilesLocation = $sslFilesLocation . '/';
-        }
-        if (!file_exists($sslFilesLocation)) {
-            $this->logError("The location " . $sslFilesLocation . " does not exist");
+        $sslFilesPaths = [];
+        foreach (["crt", "key"] as $extension) {
+            $question = new Question("What is the location of the SSL " . $extension . " file ?", self::DINGHY_CERTS_DIR_PATH . "dinghy." . $extension);
+            $sslFilePath = $this->io->askQuestion($question);
+            // Replace ~ with the home dir so file_exists works correctly
+            $sslFilePath = str_replace("~", getenv("HOME"), $sslFilePath);
+            if (!file_exists($sslFilePath)) {
+                $this->logError("The path " . $sslFilePath . " does not exist");
 
-            return false;
-        }
-        if (count(glob($sslFilesLocation . "*.crt")) == 0) {
-            $this->logError("There is no crt file available in the location " . $sslFilesLocation . ".");
-
-            return false;
-        }
-        if (count(glob($sslFilesLocation . "*.crt")) > 1) {
-            $this->logError("There are multiple crt files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
-
-            return false;
-        }
-        if (count(glob($sslFilesLocation . "*.key")) == 0) {
-            $this->logError("There is no key file available in the location " . $sslFilesLocation . ".");
-
-            return false;
-        }
-        if (count(glob($sslFilesLocation . "*.key")) > 1) {
-            $this->logError("There are multiple key files available in the location " . $sslFilesLocation . ". There should only be one crt file.");
-
-            return false;
+                exit(1);
+            } else {
+                $sslFilesPaths[$extension] = $sslFilePath;
+            }
         }
 
-        return $sslFilesLocation;
+        return $sslFilesPaths;
     }
 
     private function checkDockerDaemonIsRunning()
