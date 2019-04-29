@@ -148,20 +148,6 @@ class StartCommand extends AbstractCommand
         }
     }
 
-    private function runComposerInstall()
-    {
-        if (file_exists("composer.json") && !file_exists("vendor")) {
-            $this->logStep("composer.json file found but no vendor dir. Trying to run composer install");
-            $containerId = $this->runCommand("docker-compose -f " . $this->getDockerComposeFileName() . " ps -q php");
-            if (!empty($containerId)) {
-                $this->logStep("Running composer install");
-                $this->runCommand("docker exec " . $containerId . " composer install");
-            } else {
-                $this->logWarning("No running Php container found!.");
-            }
-        }
-    }
-
     private function runBuildUI()
     {
         if (file_exists("buildUI.sh") && !file_exists("node_modules")) {

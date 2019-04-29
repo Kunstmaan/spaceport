@@ -49,6 +49,8 @@ class InitCommand extends AbstractCommand
             $this->initHelper = new Sf4InitInitHelper($input, $output);
         }
 
+        $this->runComposerInstall();
+
         if (!$this->isDockerized(true) || $input->getOption('force')) {
             $this->writeDockerComposeFile();
             $this->writeConfigDockerFile();

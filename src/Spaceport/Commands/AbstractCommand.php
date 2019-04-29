@@ -198,6 +198,14 @@ abstract class AbstractCommand extends Command
         return true;
     }
 
+    protected function runComposerInstall()
+    {
+        if (file_exists("composer.json") && !file_exists("vendor")) {
+            $this->logStep("composer.json file found but no vendor dir. Trying to run composer install");
+            $this->runCommand("composer install");
+        }
+    }
+
     /**
      * Ask about the paths for the ssl crt and key files.
      * Returns false if a path does not exists. Otherwise it returns a key value array of the crt and key path.
