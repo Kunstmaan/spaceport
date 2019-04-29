@@ -13,7 +13,7 @@ services:
             HTTPS_METHOD: noredirect
             {%- if shuttle.apacheFallbackDomain %}
 
-            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain ~ '\n' }}
+            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
             {%- endif %}
 
     php:
@@ -24,10 +24,12 @@ services:
             - ~/.composer:/root/.composer
             - ~/.bash_history:/root/.bash_history
         links:
-            {% for database in shuttle.databases %}
-            {{- '- mysql_' ~ database.mysqlDatabase }}
-            {% endfor %}
+            {% if shuttle.elasticsearchVersion %}
             {{- '- elasticsearch' }}
+            {% endif %}
+            {%- for database in shuttle.databases %}
+            {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
+            {%- endfor %}
         networks:
             - default
             - isolated_maildev
@@ -49,10 +51,12 @@ services:
         ports:
             - "33306:3306"
     {% endfor %}
+    {%- if shuttle.elasticsearchVersion %}
     {{- 'elasticsearch:' }}
         image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    {%- endif %}
 
 volumes:
     {% for database in shuttle.databases %}

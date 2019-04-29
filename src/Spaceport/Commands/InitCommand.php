@@ -14,6 +14,14 @@ use Symfony\Component\Console\Question\Question;
 class InitCommand extends AbstractCommand
 {
 
+    CONST SUPPORTED_SYMFONY_VERSIONS = ['3', '4'];
+    CONST DEFAULT_SYMFONY_VERSION = '3';
+    CONST SUPPORTED_PHP_VERSIONS = ['7.2', '7.1'];
+    CONST DEFAULT_PHP_VERSION = '7.2';
+    CONST SUPPORTED_ELASTICSEARCH_VERSIONS = ['6'];
+    CONST DEFAULT_ELASTICSEARCH_VERSION = '6';
+
+
     /** @var SfInitHelper $initHelper*/
     private $initHelper;
 
@@ -22,7 +30,7 @@ class InitCommand extends AbstractCommand
         $this
             ->setName('init')
             ->setDescription('Initialize the project to run with docker')
-            ->addOption('force', null, InputOption::VALUE_OPTIONAL, 'Force the regeneration of the docker files');
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Force the regeneration of the docker files');
     }
 
     /**
@@ -34,7 +42,7 @@ class InitCommand extends AbstractCommand
      */
     protected function doExecute(InputInterface $input, OutputInterface $output)
     {
-        $symfonyVersion = $this->io->choice('What version of Symfony do you need?', ['3', '4'], '3');
+        $symfonyVersion = $this->io->choice('What version of Symfony do you need?', self::SUPPORTED_SYMFONY_VERSIONS, self::DEFAULT_SYMFONY_VERSION);
         if ($symfonyVersion == "3") {
             $this->initHelper = new Sf3InitInitHelper($input, $output);
         } else if ($symfonyVersion == "4") {
@@ -78,7 +86,7 @@ class InitCommand extends AbstractCommand
     {
         $php = [];
         if ($ask) {
-            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', ['7.2', '7.1'], '7.2'));
+            $this->shuttle->setPhpVersion($this->io->choice('What version of PHP do you need?', self::SUPPORTED_PHP_VERSIONS, self::DEFAULT_PHP_VERSION));
         }
 
         return $php;
@@ -87,7 +95,10 @@ class InitCommand extends AbstractCommand
     private function askElasticVersion($ask = true)
     {
         if ($ask) {
-            $this->shuttle->setElasticsearchVersion($this->io->choice('What version of Elasticsearch do you need?', ['6'], '6'));
+            $answer = $this->io->choice("Do we require elasticsearch?", ['yes', 'no'], 'yes');
+            if ($answer == "yes") {
+                $this->shuttle->setElasticsearchVersion($this->choice('What version of Elasticsearch do you need?', self::SUPPORTED_ELASTICSEARCH_VERSIONS, self::DEFAULT_ELASTICSEARCH_VERSION));
+            }
         }
     }
 
@@ -98,4 +109,13 @@ class InitCommand extends AbstractCommand
         $this->twig->renderAndWriteTemplate($this->initHelper->getTwigTemplateNameConfigDockerFile(), $configDockerFilePath, ['shuttle' => $this->shuttle]);
     }
 
+    private function choice($question, array $choices, $default = null) {
+        if (sizeof($choices) == 1) {
+            $this->logStep("Only one choice avaiable. No need to ask the choiceQuestion: " . $question);
+
+            return $default ? $default : $choices[0];
+        }
+
+        return $this->io->choice($question, $choices, $default);
+    }
 }
