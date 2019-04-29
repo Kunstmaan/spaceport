@@ -2,6 +2,8 @@
 
 namespace Spaceport\Commands;
 
+use Humbug\SelfUpdate\Exception\HttpRequestException;
+use Humbug\SelfUpdate\Updater;
 use Spaceport\Model\Shuttle;
 use Spaceport\Traits\IOTrait;
 use Spaceport\Traits\TwigTrait;
@@ -16,6 +18,8 @@ abstract class AbstractCommand extends Command
     CONST DOCKER_COMPOSE_FILE_NAME = "docker-compose.yml";
     CONST DOCKER_COMPOSE_MAC_FILE_NAME = "docker-compose-mac.yml";
     CONST DINGHY_CERTS_DIR_PATH = "~/.dinghy/certs/";
+    CONST PHAR_PACKAGE_NAME = "kunstmaan/spaceport";
+    CONST PHAR_FILE_NAME = "spaceport.phar";
 
     use TwigTrait;
     use IOTrait;
@@ -38,6 +42,7 @@ abstract class AbstractCommand extends Command
         $this->checkDockerDaemonIsRunning();
         $this->isApacheRunning();
 
+        $this->doPreExecute($output);
         $this->doExecute($input, $output);
     }
 
@@ -267,6 +272,21 @@ abstract class AbstractCommand extends Command
                 $this->logError('Apache seems to be running. Please shutdown apache and re-run your command.');
                 exit(1);
             }
+        }
+    }
+
+    private function doPreExecute()
+    {
+        $updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
+        $updater->getStrategy()->setPackageName(self::PHAR_PACKAGE_NAME);
+        $updater->getStrategy()->setPharName(self::PHAR_FILE_NAME);
+        $updater->getStrategy()->setCurrentLocalVersion($this->getApplication()->getVersion());
+        try {
+            if ($this->getName() !== 'self-update' && $updater->hasUpdate()) {
+                $this->logWarning("There is a new version of spaceport available. Run the self-update command to update");
+            }
+        } catch (\Exception $e) {
+            //Ignore errors
         }
     }
 
