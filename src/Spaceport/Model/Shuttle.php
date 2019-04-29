@@ -53,6 +53,11 @@ class Shuttle
      * @var bool
      */
     private $runSync;
+
+    /**
+     * @var bool
+     */
+    private $sslEnabled;
     
     const DOCKER_EXT = '.dev.kunstmaan.be';
 
@@ -261,5 +266,21 @@ class Shuttle
         if($index = array_search($connection, $this->databases, true)) {
             array_splice($this->databases, $index, 1);
         }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function sslEnabled()
+    {
+        return $this->sslEnabled;
+    }
+
+    /**
+     * @param boolean $sslEnabled
+     */
+    public function setSslEnabled($sslEnabled)
+    {
+        $this->sslEnabled = $sslEnabled;
     }
 }

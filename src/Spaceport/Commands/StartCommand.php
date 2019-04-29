@@ -58,8 +58,7 @@ class StartCommand extends AbstractCommand
         $this->copyApacheConfig();
         $this->runComposerInstall();
         $this->runBuildUI();
-        $text = "Docker is up and running.\n\nWebsite ==> " . $this->shuttle->getApacheVhost() . "\n\nMaildev ==> localhost:1080";
-        $this->logSuccess($text);
+        $this->logSuccess($this->getDockerRunningTextMessage());
     }
 
     private function tryToPrepDatabase()
@@ -198,5 +197,15 @@ class StartCommand extends AbstractCommand
             $this->runCommand('sudo nfsd start');
             $this->logStep('Nfsd started...');
         }
+    }
+
+    private function getDockerRunningTextMessage()
+    {
+        $website = "http://".$this->shuttle->getApacheVhost();
+        if ($this->shuttle->sslEnabled()) {
+            $website .= " and https://".$this->shuttle->getApacheVhost();
+        }
+
+        return  "Docker is up and running.\n\nWebsite ==> " . $website . "\n\nMaildev ==> http://localhost:1080";
     }
 }
