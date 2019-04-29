@@ -262,9 +262,9 @@ abstract class AbstractCommand extends Command
         $process->wait();
         $processes = $process->getOutput();
         if (!empty($processes)) {
-            $this->logError('Apache seems to be running. Please shutdown apache and re-run your command.');
-            // Only exit on spaceport start
+            // Only exit and show error on spaceport start
             if ($this instanceof StartCommand) {
+                $this->logError('Apache seems to be running. Please shutdown apache and re-run your command.');
                 exit(1);
             }
         }
