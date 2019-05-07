@@ -136,11 +136,16 @@ abstract class AbstractCommand extends Command
     {
         $home = getenv("HOME");
         if (file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt") && file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key")) {
+            $this->shuttle->setSslEnabled(true);
+
             return;
         }
 
         if ($this->io->confirm('Do you want to enable SSL for your Apache vhost ?', true)) {
             $this->createSSLCerts();
+            $this->shuttle->setSslEnabled(true);
+        } else {
+            $this->shuttle->setSslEnabled(false);
         }
     }
 
