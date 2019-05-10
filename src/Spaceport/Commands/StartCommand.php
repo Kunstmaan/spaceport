@@ -63,14 +63,21 @@ class StartCommand extends AbstractCommand
 
     private function tryToPrepDatabase()
     {
-        $home = getenv("HOME");
-        $projectName = $this->shuttle->getName();
-        $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
-        $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
-        if((count(glob("$sqlDir/*")) == 0)) {
-            $this->logStep("Database entrypoint not yet on pc --Syncing");
-            if (`which dsync`) {
-                $this->runCommand("dsync db --only-fetch-db", null, [], true);
+        $containerId = $this->getMysqlContainerId();
+        if (empty($containerId)) {
+            $home = getenv("HOME");
+            $projectName = $this->shuttle->getName();
+            $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
+            $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
+            if((count(glob("$sqlDir/*")) == 0)) {
+                if (`which dsync`) {
+                    $this->logStep("Database entrypoint not yet on pc --Syncing");
+                    $this->runCommand("dsync db --only-fetch-db", null, [], true);
+                }
+                if((count(glob("$sqlDir/*")) == 0)) {
+                    $this->logError("Failed to sync the database. Make sure the mysql dump file is present in " . $sqlDir);
+                    exit(1);
+                }
             }
         }
     }

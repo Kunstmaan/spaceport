@@ -58,6 +58,7 @@ abstract class SfInitHelper
                 $databaseConnection->setMysqlUser($this->io->askQuestion($question));
                 $question = new Question('What is the database password?', $db_name);
                 $databaseConnection->setMysqlPassword($this->io->askQuestion($question));
+                $databaseConnection->setMysqlPort($this->getRandomMysqlPort($shuttle->getName()) + $i);
 
                 $shuttle->addDatabaseConnection($databaseConnection);
             }
@@ -66,6 +67,7 @@ abstract class SfInitHelper
             $databaseConnection->setMysqlDatabase($databaseSettings['database_name']);
             $databaseConnection->setMysqlUser($databaseSettings['database_user']);
             $databaseConnection->setMysqlPassword($databaseSettings['database_password']);
+            $databaseConnection->setMysqlPort($this->getRandomMysqlPort($shuttle->getName()));
             $shuttle->addDatabaseConnection($databaseConnection);
         }
     }
@@ -92,6 +94,23 @@ abstract class SfInitHelper
         }
 
         return $file;
+    }
+
+    /**
+     * Generate a "random" mysql port number based on the seed
+     *
+     * @param $seed
+     * @return int
+     */
+    private function getRandomMysqlPort($seed)
+    {
+        $count=0;
+        foreach (str_split(md5($seed)) as $char) {
+            $count+=hexdec($char);
+        }
+
+        //We add 33000 so we get a port like 33306 to map the docker mysql instance port 3306 onto
+        return 33000 + $count % 1000;
     }
 
 }

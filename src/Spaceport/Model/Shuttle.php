@@ -2,6 +2,8 @@
 
 namespace Spaceport\Model;
 
+use Symfony\Component\Yaml\Parser;
+
 class Shuttle
 {
     /**
@@ -63,7 +65,7 @@ class Shuttle
 
     public function __construct()
     {
-        $this->name = basename(getcwd());
+        $this->name = $this->getProjectName();
         $this->apacheVhost = $this->name . self::DOCKER_EXT;
         $this->apacheDocumentRoot = "/app/web/";
         $this->runSync = false;
@@ -282,5 +284,24 @@ class Shuttle
     public function setSslEnabled($sslEnabled)
     {
         $this->sslEnabled = $sslEnabled;
+    }
+
+    /**
+     * Returns the project_name defined in .deploy/config.yml file
+     * or the basename of the cwd if the .deploy/config.yml file does not exist
+     *
+     * @return string
+     */
+    private function getProjectName()
+    {
+        if (file_exists(".deploy/config.yml")) {
+            $yaml = new Parser();
+            $config = $yaml->parse(file_get_contents(".deploy/config.yml"));
+            if (array_key_exists("project_name", $config)) {
+                return $config["project_name"];
+            }
+        }
+
+        return basename(getcwd());
     }
 }

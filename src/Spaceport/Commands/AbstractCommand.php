@@ -46,7 +46,7 @@ abstract class AbstractCommand extends Command
         $this->doExecute($input, $output);
     }
 
-    protected function runCommand($command, $timeout = null, $env = [], $quiet = false)
+    protected function runCommand($command, $timeout = 180, $env = [], $quiet = false)
     {
         $this->logCommand($command);
         $env = array_replace($_ENV, $_SERVER, $env);
@@ -115,9 +115,19 @@ abstract class AbstractCommand extends Command
         return empty($process->getOutput());
     }
 
+    protected function getContainerId($name)
+    {
+        return $this->runCommand('docker ps -a --filter="name='.$name.'" -q');
+    }
+
+    protected function getMysqlContainerId()
+    {
+        return $this->getContainerId($this->shuttle->getName()."_mysql");
+    }
+
     protected function getProxyContainerId()
     {
-        return $this->runCommand('docker ps -a --filter="name=http-proxy" -q');
+        return $this->getContainerId("http-proxy");
     }
 
     protected function isProxyRunning($containerId = null)

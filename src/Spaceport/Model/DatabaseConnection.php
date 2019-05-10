@@ -20,6 +20,11 @@ class DatabaseConnection
     private $mysqlPassword;
 
     /**
+     * @var string
+     */
+    private $mysqlPort;
+
+    /**
      * @return string
      */
     public function getMysqlDatabase()
@@ -72,6 +77,25 @@ class DatabaseConnection
     public function setMysqlPassword($mysqlPassword)
     {
         $this->mysqlPassword = $mysqlPassword;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMysqlPort()
+    {
+        return $this->mysqlPort;
+    }
+
+    /**
+     * @param string $mysqlPort
+     * @return $this
+     */
+    public function setMysqlPort($mysqlPort)
+    {
+        $this->mysqlPort = $mysqlPort;
 
         return $this;
     }

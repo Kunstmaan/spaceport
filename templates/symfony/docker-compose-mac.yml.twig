@@ -49,7 +49,7 @@ services:
             MYSQL_USER: {{ database.mysqlUser }}
             MYSQL_PASSWORD: {{ database.mysqlPassword }}
         ports:
-            - "33306:3306"
+            - {{ database.mysqlPort ~ ":3306" }}
     {% endfor %}
     {%- if shuttle.elasticsearchVersion %}
     {{- 'elasticsearch:' }}
