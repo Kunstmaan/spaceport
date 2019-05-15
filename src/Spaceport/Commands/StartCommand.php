@@ -17,6 +17,7 @@ class StartCommand extends AbstractCommand
         $this
             ->setName('start')
             ->setDescription('Start the development environment')
+            ->addOption('skip-db-prep', null, null, 'Skip the step to fetch the database from the server')
             ->addOption('clean', null, null, 'Start with clean containers.')
             ->addOption('fresh-images', null, null, 'Pull new images from dockerhub.');
     }
@@ -45,14 +46,14 @@ class StartCommand extends AbstractCommand
         }
 
         $this->setDinghySSLCerts();
-        $this->runDocker($output);
+        $this->runDocker($input, $output);
     }
 
-    private function runDocker(OutputInterface $output)
+    private function runDocker(InputInterface $input, OutputInterface $output)
     {
         $this->logStep("Building required containers");
         $this->startMaildev();
-        $this->tryToPrepDatabase();
+        $this->tryToPrepDatabase($input);
         $this->startContainers($output);
         $this->startProxy();
         $this->copyApacheConfig();
@@ -61,22 +62,24 @@ class StartCommand extends AbstractCommand
         $this->logSuccess($this->getDockerRunningTextMessage());
     }
 
-    private function tryToPrepDatabase()
+    private function tryToPrepDatabase(InputInterface $input)
     {
-        $containerId = $this->getMysqlContainerId();
-        if (empty($containerId)) {
-            $home = getenv("HOME");
-            $projectName = $this->shuttle->getName();
-            $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
-            $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
-            if((count(glob("$sqlDir/*")) == 0)) {
-                if (`which dsync`) {
-                    $this->logStep("Database entrypoint not yet on pc --Syncing");
-                    $this->runCommand("dsync db --only-fetch-db", null, [], true);
-                }
+        if (!$input->getOption('skip-db-prep')) {
+            $containerId = $this->getMysqlContainerId();
+            if (empty($containerId)) {
+                $home = getenv("HOME");
+                $projectName = $this->shuttle->getName();
+                $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
+                $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
                 if((count(glob("$sqlDir/*")) == 0)) {
-                    $this->logError("Failed to sync the database. Make sure the mysql dump file is present in " . $sqlDir);
-                    exit(1);
+                    if (`which dsync`) {
+                        $this->logStep("Database entrypoint not yet on pc --Syncing");
+                        $this->runCommand("dsync db --only-fetch-db", null, [], true);
+                    }
+                    if((count(glob("$sqlDir/*")) == 0)) {
+                        $this->logError("Failed to sync the database. Make sure the mysql dump file is present in " . $sqlDir);
+                        exit(1);
+                    }
                 }
             }
         }
