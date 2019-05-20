@@ -42,7 +42,7 @@ class StartCommand extends AbstractCommand
         $freshImages = $input->getOption('fresh-images');
         if ($freshImages) {
             $this->logStep("Pulling required images");
-            $this->runCommand('docker-compose pull');
+            $this->runCommand('docker-compose pull', 600);
         }
 
         $this->setDinghySSLCerts();
@@ -71,12 +71,12 @@ class StartCommand extends AbstractCommand
                 $projectName = $this->shuttle->getName();
                 $sqlDir = $home . '/.spaceport/mysql/' . $projectName;
                 $this->logStep('Looking for database entrypoint in: ' . $sqlDir);
-                if((count(glob("$sqlDir/*")) == 0)) {
+                if ((count(glob("$sqlDir/*")) == 0)) {
                     if (`which dsync`) {
                         $this->logStep("Database entrypoint not yet on pc --Syncing");
                         $this->runCommand("dsync db --only-fetch-db", null, [], true);
                     }
-                    if((count(glob("$sqlDir/*")) == 0)) {
+                    if ((count(glob("$sqlDir/*")) == 0)) {
                         $this->logError("Failed to sync the database. Make sure the mysql dump file is present in " . $sqlDir);
                         exit(1);
                     }
@@ -91,8 +91,7 @@ class StartCommand extends AbstractCommand
             $this->configureNfsExports($output);
         }
 
-        $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' up -d');
-
+        $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' up -d', 600);
     }
 
     private function startMaildev()
@@ -107,7 +106,7 @@ class StartCommand extends AbstractCommand
         $containerId = $this->runCommand('docker ps -a --filter="name=maildev" -q');
         if (empty($containerId)) {
             $this->logStep('Starting maildev');
-            $this->runCommand('docker run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev');
+            $this->runCommand('docker run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev', 600);
 
             return;
         }
@@ -128,7 +127,7 @@ class StartCommand extends AbstractCommand
         //Check if http-proxy container is present
         if (empty($containerId)) {
             $this->logStep('Starting proxy');
-            $this->runCommand('docker run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 8080:80 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be --name http-proxy codekitchen/dinghy-http-proxy');
+            $this->runCommand('docker run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 8080:80 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be --name http-proxy codekitchen/dinghy-http-proxy', 600);
 
             return;
         }
