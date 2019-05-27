@@ -3,6 +3,9 @@
 namespace Spaceport\Helpers;
 
 
+use Spaceport\Model\Shuttle;
+use Symfony\Component\Process\Process;
+
 class Sf4InitInitHelper extends SfInitHelper
 {
 
@@ -27,13 +30,14 @@ class Sf4InitInitHelper extends SfInitHelper
     }
 
     /**
-     * Method where you make changes to the app to make it docker ready.
-     * E.g. Change app.php (sf3) or config/bundles.php (sf4)
+     * @inheritdoc
      */
-    public function dockerizeApp()
+    public function dockerizeApp(Shuttle $shuttle)
     {
         $this->checkBundlesFile();
         $this->checkKernelFile();
+        $this->createDockerRoutesFromDev();
+        $this->createEnvFile($shuttle);
     }
 
     private function checkBundlesFile()
@@ -66,6 +70,30 @@ class Sf4InitInitHelper extends SfInitHelper
             $file = $this->writeCacheDir($file);
 
             file_put_contents("src/Kernel.php", implode("", $file));
+        }
+    }
+
+    private function createDockerRoutesFromDev()
+    {
+        if (file_exists('config/routes/dev/') && !file_exists('config/routes/docker'))
+        {
+            $this->logStep('Copying dev routes to docker routes');
+            $process = new Process('cp -r config/routes/dev config/routes/docker');
+            $process->run();
+            if (!$process->isSuccessful()) {
+                $this->logError($process->getErrorOutput());
+
+            }
+        }
+    }
+
+    private function createEnvFile(Shuttle $shuttle)
+    {
+        if (!file_exists('.env.docker')) {
+            $this->logStep('Creating .env.docker file');
+            $this->twig->renderAndWriteTemplate('symfony/sf4/env.docker.twig', '.env.docker', ['shuttle' => $shuttle]);
+        } else {
+            $this->logStep('.env.docker file already exists. Skipping!');
         }
     }
 

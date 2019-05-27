@@ -56,7 +56,7 @@ class InitCommand extends AbstractCommand
             $this->writeConfigDockerFile();
         }
         $this->logStep("dockerizing App");
-        $this->initHelper->dockerizeApp($this->io);
+        $this->initHelper->dockerizeApp($this->shuttle);
         $this->setDinghySSLCerts();
 
         $this->logSuccess("You can now run `spaceport start` to run the development environment");

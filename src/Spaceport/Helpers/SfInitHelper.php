@@ -6,6 +6,7 @@ namespace Spaceport\Helpers;
 use Spaceport\Model\DatabaseConnection;
 use Spaceport\Model\Shuttle;
 use Spaceport\Traits\IOTrait;
+use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
@@ -14,6 +15,7 @@ abstract class SfInitHelper
 {
 
     use IOTrait;
+    use TwigTrait;
 
     abstract public function getConfigDockerFilePath();
     abstract public function getTwigTemplateNameConfigDockerFile();
@@ -23,12 +25,15 @@ abstract class SfInitHelper
     /**
      * Method where you make changes to the app to make it docker ready.
      * E.g. Change app.php (sf3) or config/bundles.php (sf4)
+     *
+     * @param Shuttle $shuttle
      */
-    abstract public function dockerizeApp();
+    abstract public function dockerizeApp(Shuttle $shuttle);
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {
         $this->setUpIO($input, $output);
+        $this->setUpTwig($output);
     }
 
     public function findMySQLSettings(Shuttle $shuttle)

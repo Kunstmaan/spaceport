@@ -3,6 +3,7 @@
 namespace Spaceport\Helpers;
 
 
+use Spaceport\Model\Shuttle;
 use Symfony\Component\Yaml\Parser;
 
 class Sf3InitInitHelper extends SfInitHelper
@@ -39,7 +40,10 @@ class Sf3InitInitHelper extends SfInitHelper
         return "web";
     }
 
-    public function dockerizeApp()
+    /**
+     * @inheritdoc
+     */
+    public function dockerizeApp(Shuttle $shuttle)
     {
         $this->checkAppFile();
         $this->checkAppKernelFile();
