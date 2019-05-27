@@ -172,6 +172,9 @@ class StartCommand extends AbstractCommand
 
         $projectRoot = getcwd();
         $uid = $this->runCommand('id -u');
+        if (!file_exists('/etc/exports')) {
+            $this->runCommand('sudo touch /etc/exports');
+        }
         $gid = $this->runCommand('stat -f \'%g\' /etc/exports');
 
         $projectExportsConfig = sprintf('\"%s\" localhost -alldirs -mapall=%s:%s', $projectRoot, $uid, $gid);
