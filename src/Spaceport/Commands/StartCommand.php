@@ -160,7 +160,7 @@ class StartCommand extends AbstractCommand
     {
         if (file_exists("buildUI.sh") && !file_exists("node_modules")) {
             $this->logStep("buildUI.sh file found but no node_modules dir. Trying to run buildUI script");
-            $this->runCommand("bash buildUI.sh");
+            $this->runCommand("bash -l buildUI.sh");
         }
     }
 
