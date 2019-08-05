@@ -6,6 +6,7 @@ services:
         volumes:
             - .:/app:cached
         hostname: {{ shuttle.apacheVhost }}
+        restart: unless-stopped
         environment:
             VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
             VIRTUAL_PORT: 80
@@ -23,6 +24,7 @@ services:
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
             - ~/.bash_history:/root/.bash_history
+        restart: unless-stopped
         links:
             {% if shuttle.elasticsearchVersion %}
             {{- '- elasticsearch' }}
@@ -43,6 +45,7 @@ services:
         volumes:
             - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
             - {{ '~/.spaceport/mysql/' ~ database.mysqlDatabase }}:/docker-entrypoint-initdb.d
+        restart: unless-stopped
         environment:
             MYSQL_ROOT_PASSWORD: password
             MYSQL_DATABASE: {{ database.mysqlDatabase }}
@@ -54,6 +57,7 @@ services:
     {%- if shuttle.elasticsearchVersion %}
     {{- 'elasticsearch:' }}
         image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
+        restart: unless-stopped
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     {%- endif %}
