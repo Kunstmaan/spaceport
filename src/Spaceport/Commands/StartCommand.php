@@ -56,6 +56,7 @@ class StartCommand extends AbstractCommand
         $this->tryToPrepDatabase($input);
         $this->startContainers($output);
         $this->startProxy();
+        $this->startWatchtower();
         $this->copyApacheConfig();
         $this->runComposerInstall();
         $this->runBuildUI();
@@ -219,5 +220,25 @@ class StartCommand extends AbstractCommand
         }
 
         return  "Docker is up and running.\n\nWebsite ==> " . $website . "\n\nMaildev ==> http://localhost:1080";
+    }
+
+    private function startWatchtower()
+    {
+        $containerId = $this->getContainerId("watchtower");
+        //Check if watchtower container is present
+        if (empty($containerId)) {
+            $this->logStep('Starting watchtower');
+            $this->runCommand('docker container run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock:ro containrrr/watchtower --cleanup --include-stopped --interval 3600', 600);
+
+            return;
+        }
+
+        //Check if watchtower is running
+        if (!$this->isContainerRunning($containerId)) {
+            $this->logStep("Starting watchtower");
+            $this->runCommand('docker start ' . $containerId);
+        } else {
+            $this->logStep("Watchtower already running -- Skipping");
+        }
     }
 }

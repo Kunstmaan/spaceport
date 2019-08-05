@@ -305,5 +305,26 @@ abstract class AbstractCommand extends Command
         }
     }
 
+    /**
+     * Check if the container with id $containerId is running.
+     *
+     * @param String $containerId
+     * @return bool
+     */
+    protected function isContainerRunning($containerId = null)
+    {
+        if (null === $containerId) {
+            return false;
+        }
+
+        if (empty($containerId)) {
+            return false;
+        }
+
+        $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId, 180, [], true);
+
+        return $containerRunning == 'true';
+    }
+
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
 }
