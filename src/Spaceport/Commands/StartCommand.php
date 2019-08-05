@@ -103,19 +103,19 @@ class StartCommand extends AbstractCommand
             $this->runCommand("docker network create isolated_maildev");
         }
         //Check if maildev container is present
-        $containerId = $this->runCommand('docker ps -a --filter="name=maildev" -q');
+        $containerId = $this->runCommand('docker container ls -a -f name=maildev -q');
         if (empty($containerId)) {
             $this->logStep('Starting maildev');
-            $this->runCommand('docker run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev', 600);
+            $this->runCommand('docker container run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev', 600);
 
             return;
         }
 
         //Check if maildev is running
-        $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
+        $containerRunning = $this->runCommand('docker container inspect -f {{.State.Running}} ' . $containerId);
         if ($containerRunning == 'false') {
             $this->logStep("Starting maildev");
-            $this->runCommand('docker start ' . $containerId);
+            $this->runCommand('docker container start ' . $containerId);
         } else {
             $this->logStep("maildev already running -- Skipping");
         }
@@ -127,7 +127,7 @@ class StartCommand extends AbstractCommand
         //Check if http-proxy container is present
         if (empty($containerId)) {
             $this->logStep('Starting proxy');
-            $this->runCommand('docker run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 8080:80 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be --name http-proxy codekitchen/dinghy-http-proxy', 600);
+            $this->runCommand('docker container run -d --restart=always -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.dinghy/certs:/etc/nginx/certs -p 80:80 -p 443:443 -p 8080:80 -p 19322:19322/udp -e CONTAINER_NAME=http-proxy -e DOMAIN_TLD=dev.kunstmaan.be --name http-proxy codekitchen/dinghy-http-proxy', 600);
 
             return;
         }
@@ -135,7 +135,7 @@ class StartCommand extends AbstractCommand
         //Check if http-proxy is running
         if (!$this->isProxyRunning($containerId)) {
             $this->logStep("Starting proxy");
-            $this->runCommand('docker start ' . $containerId);
+            $this->runCommand('docker container start ' . $containerId);
         } else {
             $this->logStep("Proxy already running -- Skipping");
         }
@@ -149,7 +149,7 @@ class StartCommand extends AbstractCommand
             $containerId = $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' ps -q apache');
             if (!empty($containerId)) {
                 $this->logStep("Swapping default Apache config with docker-apache.conf file");
-                $this->runCommand('docker cp docker-apache.conf ' . $containerId . ":/etc/apache2/sites-available/000-default.conf");
+                $this->runCommand('docker container cp docker-apache.conf ' . $containerId . ":/etc/apache2/sites-available/000-default.conf");
             } else {
                 $this->logWarning("No running Apache container found!.");
             }
@@ -194,7 +194,7 @@ class StartCommand extends AbstractCommand
             $this->runCommand('osascript -e \'quit app "Docker"\'');
             $this->runCommand('open -a Docker');
 
-            $process = new Process('while ! docker ps > /dev/null 2>&1 ; do sleep 2; done');
+            $process = new Process('while ! docker container ls > /dev/null 2>&1 ; do sleep 2; done');
             $process->start();
             $process->wait();
 

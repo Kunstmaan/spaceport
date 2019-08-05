@@ -22,30 +22,30 @@ class DestroyCommand extends AbstractCommand
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
         // Look for containers
-        $process = new Process('docker ps -a -q');
+        $process = new Process('docker container ls -a -q');
         $process->start();
         $process->wait();
         $response = $process->getOutput();
 
         if (!empty($response)) {
             // Stop all containers
-            $this->runCommand('docker stop $(docker ps -a -q)');
+            $this->runCommand('docker container stop $(docker container ls -a -q)');
             // Delete all containers
-            $this->runCommand('docker rm $(docker ps -a -q)');
+            $this->runCommand('docker container rm $(docker container ls -a -q)');
         }
 
         // Prune all networks (there are some predefined ones from docker itself which can't be removed)
         $this->runCommand('docker network prune -f');
 
         // Look for images
-        $process = new Process('docker images -q');
+        $process = new Process('docker image ls -q');
         $process->start();
         $process->wait();
         $response = $process->getOutput();
 
         if (!empty($response)) {
             // Delete all images
-            $this->runCommand('docker rmi $(docker images -q)');
+            $this->runCommand('docker image rm $(docker image ls -q)');
         }
 
         // Look for volumes
@@ -67,7 +67,7 @@ class DestroyCommand extends AbstractCommand
             $this->runCommand('osascript -e \'quit app "Docker"\'');
             $this->runCommand('open -a Docker');
 
-            $process = new Process('while ! docker ps > /dev/null 2>&1 ; do sleep 2; done');
+            $process = new Process('while ! docker container ls > /dev/null 2>&1 ; do sleep 2; done');
             $process->start();
             $process->wait();
         }

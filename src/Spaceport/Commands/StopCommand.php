@@ -36,7 +36,7 @@ class StopCommand extends AbstractCommand
     private function stopAllContainers()
     {
         $this->logStep("Stopping all containers");
-        $this->runCommand('docker stop $(docker ps -aq)');
+        $this->runCommand('docker container stop $(docker container ls -a -q)');
     }
 
     private function stopProjectContainers()
