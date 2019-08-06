@@ -117,7 +117,7 @@ abstract class AbstractCommand extends Command
 
     protected function getContainerId($name)
     {
-        return $this->runCommand('docker ps -a --filter="name='.$name.'" -q');
+        return $this->runCommand('docker container ls -a -f name='.$name.' -q');
     }
 
     protected function getMysqlContainerId()
@@ -140,7 +140,7 @@ abstract class AbstractCommand extends Command
             return false;
         }
 
-        $containerRunning = $this->runCommand('docker inspect -f \'{{.State.Running}}\' ' . $containerId);
+        $containerRunning = $this->runCommand('docker container inspect -f {{.State.Running}} ' . $containerId);
         return $containerRunning !== 'false';
     }
 
