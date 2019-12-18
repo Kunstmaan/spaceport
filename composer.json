@@ -18,7 +18,8 @@
     "padraic/phar-updater": "^1.0",
     "twig/twig": "^1.24",
     "symfony/yaml": "^3.0",
-    "symfony/process": "^3.0"
+    "symfony/process": "^3.0",
+    "symfony/debug": "^3.4"
   },
   "extra": {
     "branch-alias": {
