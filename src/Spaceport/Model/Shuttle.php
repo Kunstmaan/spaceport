@@ -60,18 +60,18 @@ class Shuttle
      * @var bool
      */
     private $sslEnabled;
-    
+
     const DOCKER_EXT = '.dev.kunstmaan.be';
 
     public function __construct()
     {
         $this->name = $this->getProjectName();
         $this->apacheVhost = $this->name . self::DOCKER_EXT;
-        $this->apacheDocumentRoot = "/app/web/";
+        $this->apacheDocumentRoot = '/app/web/';
         $this->runSync = false;
         $this->databases = [];
     }
-    
+
     /**
      * @return string
      */
@@ -157,7 +157,7 @@ class Shuttle
      */
     public function setApacheFallbackDomain($apacheFallbackDomain)
     {
-        $this->apacheFallbackDomain = $apacheFallbackDomain == '/' ? null : $apacheFallbackDomain;
+        $this->apacheFallbackDomain = $apacheFallbackDomain === '/' ? null : $apacheFallbackDomain;
     }
 
     /**
@@ -294,11 +294,11 @@ class Shuttle
      */
     private function getProjectName()
     {
-        if (file_exists(".deploy/config.yml")) {
+        if (file_exists('.deploy/config.yml')) {
             $yaml = new Parser();
-            $config = $yaml->parse(file_get_contents(".deploy/config.yml"));
-            if (array_key_exists("project_name", $config)) {
-                return $config["project_name"];
+            $config = $yaml->parse(file_get_contents('.deploy/config.yml'));
+            if (isset($config['project_name'])) {
+                return $config['project_name'];
             }
         }
 

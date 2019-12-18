@@ -24,12 +24,10 @@ class Sf3InitInitHelper extends SfInitHelper
         $yaml = new Parser();
         $databaseSettings = [];
         $parameters = $yaml->parse(file_get_contents("app/config/parameters.yml"));
-        if (array_key_exists('database_name', $parameters['parameters']) &&
-            array_key_exists('database_user', $parameters['parameters']) &&
-            array_key_exists('database_password', $parameters['parameters'])) {
-            $databaseSettings["database_name"] = $parameters["parameters"]["database_name"];
-            $databaseSettings["database_user"] = $parameters["parameters"]["database_user"];
-            $databaseSettings["database_password"] = $parameters["parameters"]["database_password"];
+        if (isset($parameters['parameters']['database_name'], $parameters['parameters']['database_user'], $parameters['parameters']['database_password'])) {
+            $databaseSettings['database_name'] = $parameters['parameters']['database_name'];
+            $databaseSettings['database_user'] = $parameters['parameters']['database_user'];
+            $databaseSettings['database_password'] = $parameters['parameters']['database_password'];
         }
 
         return $databaseSettings;
@@ -59,12 +57,12 @@ class Sf3InitInitHelper extends SfInitHelper
             foreach ($file as $key => $line) {
                 if (preg_match("/getenv\('APP_ENV'\) === ['|\"]dev['|\"](.*)/", $line, $matches) && strpos($line, "docker") === false) {
                     $match = $matches[0];
-                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') === 'docker'" . substr($match, -3), -3);
+                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') === 'docker'".substr($match, -3), -3);
                     $file[$key] = str_replace($match, $matchReplace, $file[$key]);
                 }
                 if (preg_match("/getenv\('APP_ENV'\) !== ['|\"]dev['|\"](.*)/", $line, $matches) && strpos($line, "docker") === false) {
                     $match = $matches[0];
-                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') !== 'docker'" . substr($match, -3), -3);
+                    $matchReplace = substr_replace($match, "|| getenv('APP_ENV') !== 'docker'".substr($match, -3), -3);
                     $file[$key] = str_replace($match, $matchReplace, $file[$key]);
                 }
             }
@@ -93,7 +91,8 @@ class Sf3InitInitHelper extends SfInitHelper
         }
     }
 
-    private function writeRegisterBundles(array $file) {
+    private function writeRegisterBundles(array $file)
+    {
         $method = new \ReflectionMethod('AppKernel', 'registerBundles');
         $slice = array_slice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
         foreach ($slice as $key => $line) {
@@ -101,7 +100,7 @@ class Sf3InitInitHelper extends SfInitHelper
                 //Match the part array('dev') or ['dev'] either with single or double quotes until the first ) or ]
                 if (preg_match("/array\([\'|\"].*?\)|\[[\'|\"].*?\]/", $line, $matches)) {
                     $match = $matches[0];
-                    $matchReplace = substr_replace($match, ", 'docker'" . substr($match, -1), -1);
+                    $matchReplace = substr_replace($match, ", 'docker'".substr($match, -1), -1);
                     $slice[$key] = str_replace($match, $matchReplace, $slice[$key]);
                 }
             }

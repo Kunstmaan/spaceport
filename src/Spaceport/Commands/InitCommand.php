@@ -98,7 +98,7 @@ class InitCommand extends AbstractCommand
     {
         if ($ask) {
             $answer = $this->io->choice("Do we require elasticsearch?", ['yes', 'no'], 'yes');
-            if ($answer == "yes") {
+            if ($answer === "yes") {
                 $this->shuttle->setElasticsearchVersion($this->choice('What version of Elasticsearch do you need?', self::SUPPORTED_ELASTICSEARCH_VERSIONS, self::DEFAULT_ELASTICSEARCH_VERSION));
             }
         }
@@ -112,7 +112,7 @@ class InitCommand extends AbstractCommand
     }
 
     private function choice($question, array $choices, $default = null) {
-        if (sizeof($choices) == 1) {
+        if (count($choices) === 1) {
             $this->logStep("Only one choice avaiable. No need to ask the choiceQuestion: " . $question);
 
             return $default ? $default : $choices[0];
