@@ -46,6 +46,9 @@ class Shuttle
      */
     private $elasticsearchVersion;
 
+    /** @var string */
+    private $mysqlVersion = '5.6';
+
     /**
      * @var string
      */
@@ -284,6 +287,18 @@ class Shuttle
     public function setSslEnabled($sslEnabled)
     {
         $this->sslEnabled = $sslEnabled;
+    }
+
+    public function getMysqlVersion()
+    {
+        return $this->mysqlVersion;
+    }
+
+    public function setMysqlVersion($mysqlVersion)
+    {
+        $this->mysqlVersion = $mysqlVersion;
+
+        return $this;
     }
 
     /**

@@ -20,6 +20,8 @@ class InitCommand extends AbstractCommand
     CONST DEFAULT_PHP_VERSION = '7.2';
     CONST SUPPORTED_ELASTICSEARCH_VERSIONS = ['6'];
     CONST DEFAULT_ELASTICSEARCH_VERSION = '6';
+    CONST SUPPORTED_MYSQL_VERSIONS = ['5.6', '5.7'];
+    CONST DEFAULT_MYSQL_VERSION = '5.6';
 
 
     /** @var SfInitHelper $initHelper*/
@@ -65,6 +67,7 @@ class InitCommand extends AbstractCommand
 
     private function writeDockerComposeFile()
     {
+        $this->askMysqlVersion();
         $this->initHelper->findMySQLSettings($this->shuttle);
         $this->findApacheSettings();
         $this->findPHPSettings();
@@ -92,6 +95,13 @@ class InitCommand extends AbstractCommand
         }
 
         return $php;
+    }
+
+    private function askMysqlVersion($ask = true)
+    {
+        if ($ask) {
+            $this->shuttle->setMysqlVersion($this->choice('What version of Mysql do you need?', self::SUPPORTED_MYSQL_VERSIONS, self::DEFAULT_MYSQL_VERSION));
+        }
     }
 
     private function askElasticVersion($ask = true)

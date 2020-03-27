@@ -42,7 +42,7 @@ services:
             XDEBUG_HOST: '10.254.254.254'
     {% for database in shuttle.databases %}
     {{- 'mysql_' ~ database.mysqlDatabase }}:
-        image: kunstmaan/spaceport-mysql
+        image: kunstmaan/spaceport-mysql:{{ shuttle.mysqlVersion }}
         volumes:
             - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
             - {{ '~/.spaceport/mysql/' ~ database.mysqlDatabase }}:/docker-entrypoint-initdb.d
