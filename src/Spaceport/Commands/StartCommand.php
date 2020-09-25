@@ -106,7 +106,7 @@ class StartCommand extends AbstractCommand
         $containerId = $this->runCommand('docker container ls -a -f name=maildev -q');
         if (empty($containerId)) {
             $this->logStep('Starting maildev');
-            $this->runCommand('docker container run --network isolated_maildev -d --restart=always -p 1080:80 -e CONTAINER_NAME=maildev --name maildev djfarrelly/maildev', 600);
+            $this->runCommand('docker container run --network isolated_maildev -d --restart=always -p 1080:1080 -e CONTAINER_NAME=maildev --name maildev schickling/mailcatcher', 600);
 
             return;
         }
