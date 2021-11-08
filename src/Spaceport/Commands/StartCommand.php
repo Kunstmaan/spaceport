@@ -87,10 +87,6 @@ class StartCommand extends AbstractCommand
 
     private function startContainers(OutputInterface $output)
     {
-        if ($this->isMacOs()) {
-            $this->configureNfsExports($output);
-        }
-
         $this->runCommand('docker-compose -f ' . $this->getDockerComposeFileName() . ' up -d', 600);
     }
 
