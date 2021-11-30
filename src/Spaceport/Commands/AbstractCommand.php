@@ -2,8 +2,6 @@
 
 namespace Spaceport\Commands;
 
-use Humbug\SelfUpdate\Exception\HttpRequestException;
-use Humbug\SelfUpdate\Updater;
 use Spaceport\Model\Shuttle;
 use Spaceport\Traits\IOTrait;
 use Spaceport\Traits\TwigTrait;
@@ -292,17 +290,6 @@ abstract class AbstractCommand extends Command
 
     private function doPreExecute()
     {
-        $updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
-        $updater->getStrategy()->setPackageName(self::PHAR_PACKAGE_NAME);
-        $updater->getStrategy()->setPharName(self::PHAR_FILE_NAME);
-        $updater->getStrategy()->setCurrentLocalVersion($this->getApplication()->getVersion());
-        try {
-            if ($this->getName() !== 'self-update' && $updater->hasUpdate()) {
-                $this->logWarning("There is a new version of spaceport available. Run the self-update command to update");
-            }
-        } catch (\Exception $e) {
-            //Ignore errors
-        }
     }
 
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
