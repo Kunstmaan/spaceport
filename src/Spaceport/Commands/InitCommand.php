@@ -14,9 +14,9 @@ use Symfony\Component\Console\Question\Question;
 class InitCommand extends AbstractCommand
 {
 
-    CONST SUPPORTED_SYMFONY_VERSIONS = ['3', '4'];
-    CONST DEFAULT_SYMFONY_VERSION = '3';
-    CONST SUPPORTED_PHP_VERSIONS = ['7.2', '7.1'];
+    CONST SUPPORTED_SYMFONY_VERSIONS = ['3', '4', '5'];
+    CONST DEFAULT_SYMFONY_VERSION = '4';
+    CONST SUPPORTED_PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0'];
     CONST DEFAULT_PHP_VERSION = '7.2';
     CONST SUPPORTED_ELASTICSEARCH_VERSIONS = ['6'];
     CONST DEFAULT_ELASTICSEARCH_VERSION = '6';
@@ -48,6 +48,8 @@ class InitCommand extends AbstractCommand
         if ($symfonyVersion == "3") {
             $this->initHelper = new Sf3InitInitHelper($input, $output);
         } else if ($symfonyVersion == "4") {
+            $this->initHelper = new Sf4InitInitHelper($input, $output);
+        } else {
             $this->initHelper = new Sf4InitInitHelper($input, $output);
         }
 
