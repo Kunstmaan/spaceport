@@ -25,15 +25,6 @@ class StatusCommand extends AbstractCommand
         $version = $this->runCommand("docker version | grep Version | cut -d \":\" -f2 | sed '1d'");
         $this->logSuccess('Your docker version is ' . $version);
 
-        // check if nfsd is running when on MacOs
-        if ($this->isMacOs()) {
-            if ($this->isNfsdRunning()) {
-                $this->logSuccess('Nfsd is running');
-            } else {
-                $this->logError('Nfsd is not running');
-            }
-        }
-
         // check if http proxy is running
         if ($this->isProxyRunning()) {
             $this->logSuccess('Http proxy container is running');

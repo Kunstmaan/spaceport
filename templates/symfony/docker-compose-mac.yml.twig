@@ -1,10 +1,10 @@
-version: '3.7'
+version: '3.9'
 
 services:
     apache:
         image: kunstmaan/spaceport-apache
         volumes:
-            - nfsmount:/app
+            - .:/app:cached
         hostname: {{ shuttle.apacheVhost }}
         restart: unless-stopped
         environment:
@@ -20,7 +20,7 @@ services:
     php:
         image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
         volumes:
-            - nfsmount:/app
+            - .:/app:cached
             - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
             - ~/.composer:/root/.composer
             - ~/.bash_history:/root/.bash_history
@@ -67,13 +67,6 @@ volumes:
     {% for database in shuttle.databases %}
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
     {% endfor %}
-    {{- 'app' }}: {}
-    nfsmount:
-        driver: local
-        driver_opts:
-            type: nfs
-            o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-            device: ":${PWD}"
 
 networks:
     isolated_maildev:

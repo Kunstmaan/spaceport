@@ -98,21 +98,6 @@ abstract class AbstractCommand extends Command
         return \PHP_OS === 'Darwin';
     }
 
-    /**
-     * Check if nfsd is running
-     *
-     * @return bool
-     */
-    protected function isNfsdRunning()
-    {
-        // Command throws exit code so we need to do the process manually
-        $process = new Process('sudo nfsd status | grep "not running"');
-        $process->start();
-        $process->wait();
-
-        return empty($process->getOutput());
-    }
-
     protected function getContainerId($name)
     {
         return $this->runCommand('docker container ls -a -f name='.$name.' -q');
@@ -193,8 +178,7 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * Check that the current user is owner of the files. If not this might give problems with the NFS mount
-     * because the local user is mapped to the root user in the docker container.
+     * Check that the current user is owner of the files.
      * This function only checks in the root directory.
      */
     protected function isOwnerOfFilesInDirectory()
@@ -207,7 +191,7 @@ abstract class AbstractCommand extends Command
                 $info = stat( $path . '/' . $file);
                 $fileUid = $info[4];
                 if ($fileUid != $uid) {
-                    $this->logWarning("You are not the filesystem owner of some files/directories in the project. This might give problems with the NFS mount.");
+                    $this->logWarning("You are not the filesystem owner of some files/directories in the project.");
                     return false;
                 }
             }

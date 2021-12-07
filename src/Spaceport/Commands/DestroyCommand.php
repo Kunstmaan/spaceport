@@ -13,7 +13,7 @@ class DestroyCommand extends AbstractCommand
     {
         $this
             ->setName('destroy')
-            ->setDescription('Remove all container, volumes, networks, images (and restart docker and Nfsd when on MacOs)')
+            ->setDescription('Remove all container, volumes, networks, images (and restart docker when on MacOs)')
         ;
     }
 
@@ -57,19 +57,6 @@ class DestroyCommand extends AbstractCommand
         if (!empty($response)) {
             // Delete all volumes
             $this->runCommand('docker volume rm $(docker volume ls -q)');
-        }
-
-        $this->logSuccess('You sunk your battleship. Please wait until we build you a new one...');
-
-        // restart services
-        if ($this->isMacOs()) {
-            $this->runCommand('sudo nfsd restart');
-            $this->runCommand('osascript -e \'quit app "Docker"\'');
-            $this->runCommand('open -a Docker');
-
-            $process = new Process('while ! docker container ls > /dev/null 2>&1 ; do sleep 2; done');
-            $process->start();
-            $process->wait();
         }
 
         $this->logSuccess('Your new battleship is ready');
