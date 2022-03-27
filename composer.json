@@ -15,7 +15,8 @@
   "require": {
     "php": ">=8.0",
     "symfony/console": "^4.0",
-    "twig/twig": "^1.24",
+    "twig/twig": "^3.0",
+    "twig/extra-bundle": "*",
     "symfony/yaml": "^4.0",
     "symfony/process": "^4.0",
     "symfony/debug": "^4.0"
