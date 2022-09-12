@@ -17,17 +17,7 @@ services:
         ports:
             - {{ database.mysqlPort ~ ":3306" }}
     {% endfor %}
-    {%- if shuttle.elasticsearchVersion %}
-    {{- 'elasticsearch:' }}
-        image: docker.elastic.co/elasticsearch/elasticsearch:{{ shuttle.elasticsearchVersion }}
-        restart: unless-stopped
-        environment:
-            ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-            discovery.type: "single-node"
-        ports:
-            - "9200:9200"
-    {%- endif %}
-    php:
+    {{- 'web:' }}
         image: fpfis/httpd-php-dev:{{ shuttle.phpVersion }}
         restart: unless-stopped
         ports:
@@ -40,17 +30,17 @@ services:
             - ~/.bash_history:/root/.bash_history
         links:
         {% if shuttle.elasticsearchVersion %}
-        {{- '- elasticsearch' }}
+    {{ '- elasticsearch' }}
         {% endif %}
         {%- for database in shuttle.databases %}
-        {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
+    {{ '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
         {%- endfor %}
         depends_on:
         {% if shuttle.elasticsearchVersion %}
-        {{- '- elasticsearch' }}
+    {{ '- elasticsearch' }}
         {% endif %}
         {%- for database in shuttle.databases %}
-        {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
+    {{ '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
         {%- endfor %}
         networks:
             - default
@@ -62,6 +52,19 @@ services:
             APP_ENV: docker
             SYMFONY_ENV: docker
             XDEBUG: 'off'
+    {{ "\n" }}
+    {%- if shuttle.elasticsearchVersion %}
+    {{ 'elasticsearch:' }}
+        image: docker.elastic.co/elasticsearch/elasticsearch:{{ shuttle.elasticsearchVersion }}
+        restart: unless-stopped
+        environment:
+            ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+            discovery.type: "single-node"
+        ports:
+            - "9200:9200"
+
+    {%- endif %}
+    {{ "\n" }}
 volumes:
     {% for database in shuttle.databases %}
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}
