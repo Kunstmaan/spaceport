@@ -19,7 +19,8 @@
     "twig/extra-bundle": "*",
     "symfony/yaml": "^4.0",
     "symfony/process": "^4.0",
-    "symfony/debug": "^4.0"
+    "symfony/debug": "^4.0",
+    "ext-posix": "*"
   },
   "extra": {
     "branch-alias": {

@@ -8,7 +8,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 trait IOTrait
 {
-    protected $logo = '<fg=green;options=bold>
+    protected string $logo = '<fg=green;options=bold>
  ███████╗██████╗  █████╗  ██████╗███████╗██████╗  ██████╗ ██████╗ ████████╗
  ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
  ███████╗██████╔╝███████║██║     █████╗  ██████╔╝██║   ██║██████╔╝   ██║   
@@ -18,58 +18,52 @@ trait IOTrait
 </fg=green;options=bold>
 ';
 
-    /**
-     * @var SymfonyStyle
-     */
-    protected $io;
+    protected ?SymfonyStyle $io = null;
 
-    /**
-     * @var OutputInterface
-     */
-    protected $output;
+    protected ?OutputInterface $output = null;
 
-    public function setUpIO(InputInterface $input, OutputInterface $output)
+    public function setUpIO(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
         $this->output = $output;
     }
 
-    public function logCommand($command)
+    public function logCommand($command): void
     {
         if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
             $this->io->text('<fg=yellow>      $ ' . $command . '</>');
         }
     }
 
-    public function logStep($command)
+    public function logStep($command): void
     {
         if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
             $this->io->text('<fg=blue> - ' . $command . '</>');
         }
     }
 
-    public function logWarning($command)
+    public function logWarning($command): void
     {
         if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
             $this->io->warning($command);
         }
     }
 
-    public function logSuccess($command)
+    public function logSuccess($command): void
     {
         if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
             $this->io->success($command);
         }
     }
 
-    public function logError($command)
+    public function logError($command): void
     {
         if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_QUIET) {
             $this->io->error($command);
         }
     }
 
-    public function showLogo()
+    public function showLogo(): void
     {
         $this->io->text($this->logo);
     }

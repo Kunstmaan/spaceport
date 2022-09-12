@@ -3,6 +3,7 @@
 namespace Spaceport\Helpers;
 
 
+use ReflectionMethod;
 use Spaceport\Model\DatabaseConnection;
 use Spaceport\Model\Shuttle;
 use Spaceport\Traits\IOTrait;
@@ -13,7 +14,6 @@ use Symfony\Component\Console\Question\Question;
 
 abstract class SfInitHelper
 {
-
     use IOTrait;
     use TwigTrait;
 
@@ -22,12 +22,6 @@ abstract class SfInitHelper
     abstract public function getDatabaseSettings();
     abstract public function getApacheDocumentRoot();
 
-    /**
-     * Method where you make changes to the app to make it docker ready.
-     * E.g. Change app.php (sf3) or config/bundles.php (sf4)
-     *
-     * @param Shuttle $shuttle
-     */
     abstract public function dockerizeApp(Shuttle $shuttle);
 
     public function __construct(InputInterface $input, OutputInterface $output)
@@ -36,7 +30,7 @@ abstract class SfInitHelper
         $this->setUpTwig($output);
     }
 
-    public function findMySQLSettings(Shuttle $shuttle)
+    public function findMySQLSettings(Shuttle $shuttle): void
     {
         $databaseSettings = $this->getDatabaseSettings();
 
@@ -77,16 +71,16 @@ abstract class SfInitHelper
         }
     }
 
-    protected function writeDir($reflectionClass, $reflectionMethod, array $file, $returnValue)
+    protected function writeDir($reflectionClass, $reflectionMethod, array $file, $returnValue): array
     {
-        $method = new \ReflectionMethod($reflectionClass, $reflectionMethod);
+        $method = new ReflectionMethod($reflectionClass, $reflectionMethod);
         if ($method->getDeclaringClass()->getName() === $reflectionClass) {
             $slice = array_slice($file, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
             $contents = implode('', $slice);
-            if (strpos($contents, 'docker') === false) {
+            if (!str_contains($contents, 'docker')) {
                 $tmp = ["        if (\$this->getEnvironment() === 'docker') {\n            return '" . $returnValue . "';\n        }\n\n"];
                 foreach ($slice as $key => $line) {
-                    if (strpos($line, '{') !== false) {
+                    if (str_contains($line, '{')) {
                         $slice = array_merge(array_slice($slice, 0, $key + 1), $tmp, array_slice($slice, $key + 1));
                         break;
                     }
@@ -101,13 +95,7 @@ abstract class SfInitHelper
         return $file;
     }
 
-    /**
-     * Generate a "random" mysql port number based on the seed
-     *
-     * @param $seed
-     * @return int
-     */
-    private function getRandomMysqlPort($seed)
+    private function getRandomMysqlPort($seed): int
     {
         $count=0;
         foreach (str_split(md5($seed)) as $char) {

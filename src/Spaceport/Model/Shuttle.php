@@ -47,7 +47,7 @@ class Shuttle
     private $elasticsearchVersion;
 
     /** @var string */
-    private $mysqlVersion = '5.6';
+    private $mysqlVersion = '5.7';
 
     /**
      * @var string

@@ -1,47 +1,10 @@
 version: '3.9'
 
 services:
-    apache:
-        image: kunstmaan/spaceport-apache
-        volumes:
-            - .:/app:cached
-        hostname: {{ shuttle.apacheVhost }}
-        restart: unless-stopped
-        environment:
-            VIRTUAL_HOST: {{ shuttle.apacheVhost }},~^{{ shuttle.name }}\..*\.xip\.io
-            VIRTUAL_PORT: 80
-            DOCUMENT_ROOT: {{ shuttle.apacheDocumentRoot }}
-            HTTPS_METHOD: redirect
-            {%- if shuttle.apacheFallbackDomain %}
-
-            FALLBACK_DOMAIN: {{ shuttle.apacheFallbackDomain }}
-            {%- endif %}
-
-    php:
-        image: kunstmaan/spaceport-php:{{ shuttle.phpVersion }}
-        volumes:
-            - .:/app:cached
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.composer:/root/.composer
-            - ~/.bash_history:/root/.bash_history
-        restart: unless-stopped
-        links:
-            {% if shuttle.elasticsearchVersion %}
-            {{- '- elasticsearch' }}
-            {% endif %}
-            {%- for database in shuttle.databases %}
-            {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
-            {%- endfor %}
-        networks:
-            - default
-            - isolated_maildev
-        environment:
-            APP_ENV: docker
-            XDEBUG: 'off'
-            XDEBUG_HOST: '10.254.254.254'
     {% for database in shuttle.databases %}
     {{- 'mysql_' ~ database.mysqlDatabase }}:
-        image: kunstmaan/spaceport-mysql:{{ shuttle.mysqlVersion }}
+        image: percona/percona-server:{{ shuttle.mysqlVersion }}
+        command: --innodb-log-file-size=1G --max_allowed_packet=1G --innodb-buffer-pool-size=512M --wait_timeout=3000 --net_write_timeout=3000 --log_error_verbosity=3
         volumes:
             - {{ 'mysqldata_' ~ database.mysqlDatabase }}:/var/lib/mysql
             - {{ '~/.spaceport/mysql/' ~ database.mysqlDatabase }}:/docker-entrypoint-initdb.d
@@ -56,12 +19,49 @@ services:
     {% endfor %}
     {%- if shuttle.elasticsearchVersion %}
     {{- 'elasticsearch:' }}
-        image: kunstmaan/spaceport-elasticsearch:{{ shuttle.elasticsearchVersion }}
+        image: docker.elastic.co/elasticsearch/elasticsearch:{{ shuttle.elasticsearchVersion }}
         restart: unless-stopped
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+            discovery.type: "single-node"
+        ports:
+            - "9200:9200"
     {%- endif %}
-
+    php:
+        image: fpfis/httpd-php-dev:{{ shuttle.phpVersion }}
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
+        working_dir: /app
+        volumes:
+            - .:/app:rw
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+            - ~/.composer:/root/.composer
+            - ~/.bash_history:/root/.bash_history
+        links:
+        {% if shuttle.elasticsearchVersion %}
+        {{- '- elasticsearch' }}
+        {% endif %}
+        {%- for database in shuttle.databases %}
+        {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
+        {%- endfor %}
+        depends_on:
+        {% if shuttle.elasticsearchVersion %}
+        {{- '- elasticsearch' }}
+        {% endif %}
+        {%- for database in shuttle.databases %}
+        {{- '- mysql_' ~ database.mysqlDatabase ~ '\n' }}
+        {%- endfor %}
+        networks:
+            - default
+            - isolated_maildev
+        environment:
+            COMPOSERVER: "--2"
+            DOCUMENT_ROOT: /app/public
+            HTTPS_METHOD: noredirect
+            APP_ENV: docker
+            SYMFONY_ENV: docker
+            XDEBUG: 'off'
 volumes:
     {% for database in shuttle.databases %}
     {{- 'mysqldata_' ~ database.mysqlDatabase }}: {}

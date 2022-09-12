@@ -10,7 +10,7 @@ use Twig\Loader\FilesystemLoader;
 
 class TwigHelper
 {
-    private $twig;
+    private Environment $twig;
 
     public function __construct(OutputInterface $output)
     {
@@ -26,10 +26,12 @@ class TwigHelper
         $this->twig = new Environment($twig_loader, $twig_options);
     }
 
-    public function renderAndWriteTemplate($source, $target, array $variables = array())
+    public function renderAndWriteTemplate($source, $target, array $variables = array()): void
     {
         if(!file_exists(dirname($target))) {
-            mkdir(dirname($target), 0755, true);
+            if (!mkdir($concurrentDirectory = dirname($target), 0755, true) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
         }
         $template = $this->twig->load('templates/' . $source);
         $content = $template->render($variables);

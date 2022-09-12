@@ -24,9 +24,7 @@ $app = new Spaceport\Application('Spaceport', $appVersion);
 $app->add(new Spaceport\Commands\InitCommand());
 $app->add(new Spaceport\Commands\StartCommand());
 $app->add(new Spaceport\Commands\StopCommand());
-$app->add(new Spaceport\Commands\StatusCommand());
 $app->add(new Spaceport\Commands\SslCommand());
-$app->add(new Spaceport\Commands\DestroyCommand());
 $app->add(new Spaceport\Commands\CleanCommand());
 
 $app->run();
