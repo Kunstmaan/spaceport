@@ -129,7 +129,7 @@ abstract class AbstractCommand extends Command
             if (!in_array($file, ['.', '..'])) {
                 $info = stat($path . '/' . $file);
                 $fileUid = $info[4];
-                if ($fileUid !== $uid) {
+                if ((int) $fileUid !== (int) $uid) {
                     $this->logWarning("You are not the filesystem owner of some files/directories in the project.");
                     return false;
                 }
