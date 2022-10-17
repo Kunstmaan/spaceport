@@ -23,6 +23,7 @@ if (!isset($_SERVER['PATH']) && isset($_SERVER['Path'])) {
 $app = new Spaceport\Application('Spaceport', $appVersion);
 $app->add(new Spaceport\Commands\InitCommand());
 $app->add(new Spaceport\Commands\StartCommand());
+$app->add(new Spaceport\Commands\CopyCommand());
 $app->add(new Spaceport\Commands\StopCommand());
 $app->add(new Spaceport\Commands\SslCommand());
 $app->add(new Spaceport\Commands\CleanCommand());
