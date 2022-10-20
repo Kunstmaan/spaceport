@@ -49,6 +49,7 @@ class StartCommand extends AbstractCommand
     private function runDocker(InputInterface $input, OutputInterface $output): void
     {
         $this->logStep("Building required containers");
+        $this->startWatchtower();
         $this->startMaildev();
         $this->startContainers($output);
         $this->logSuccess($this->getDockerRunningTextMessage());
@@ -83,6 +84,27 @@ class StartCommand extends AbstractCommand
             $this->runCommand('docker container start ' . $containerId);
         } else {
             $this->logStep("maildev already running -- Skipping");
+        }
+    }
+
+    private function startWatchtower()
+    {
+        $containerId = $this->runCommand('docker container ls -a -f name=watchtower -q');
+        //Check if watchtower container is present
+        if (empty($containerId)) {
+            $this->logStep('Starting watchtower');
+            $this->runCommand('docker container run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock:ro containrrr/watchtower --cleanup --include-stopped --interval 3600', 600);
+
+            return;
+        }
+
+        //Check if watchtower is running
+        $containerRunning = $this->runCommand('docker container inspect -f {{.State.Running}} ' . $containerId);
+        if ($containerRunning === 'false') {
+            $this->logStep("Starting watchtower");
+            $this->runCommand('docker start ' . $containerId);
+        } else {
+            $this->logStep("Watchtower already running -- Skipping");
         }
     }
 
