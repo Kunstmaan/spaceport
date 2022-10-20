@@ -9,30 +9,27 @@ use Symfony\Component\Process\Process;
 class Sf4InitInitHelper extends SfInitHelper
 {
 
-    public function getConfigDockerFilePath()
+    public function getConfigDockerFilePath(): string
     {
         return "config/packages/docker/config.yaml";
     }
 
-    public function getTwigTemplateNameConfigDockerFile()
+    public function getTwigTemplateNameConfigDockerFile(): string
     {
         return "symfony/config_docker_sf4.yaml.twig";
     }
 
-    public function getDatabaseSettings()
+    public function getDatabaseSettings(): array
     {
         return [];
     }
 
-    public function getApacheDocumentRoot()
+    public function getApacheDocumentRoot(): string
     {
         return "public";
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function dockerizeApp(Shuttle $shuttle)
+    public function dockerizeApp(Shuttle $shuttle): void
     {
         $this->checkBundlesFile();
         $this->checkKernelFile();
@@ -40,7 +37,7 @@ class Sf4InitInitHelper extends SfInitHelper
         $this->createEnvFile($shuttle);
     }
 
-    private function checkBundlesFile()
+    private function checkBundlesFile(): void
     {
         $this->logStep('Checking if the config/bundles.php file is setup for Docker');
 
@@ -59,7 +56,7 @@ class Sf4InitInitHelper extends SfInitHelper
         }
     }
 
-    private function checkKernelFile()
+    private function checkKernelFile(): void
     {
         $this->logStep('Checking if the src/Kernel.php file is setup for Docker');
 
@@ -73,12 +70,12 @@ class Sf4InitInitHelper extends SfInitHelper
         }
     }
 
-    private function createDockerRoutesFromDev()
+    private function createDockerRoutesFromDev(): void
     {
         if (file_exists('config/routes/dev/') && !file_exists('config/routes/docker'))
         {
             $this->logStep('Copying dev routes to docker routes');
-            $process = new Process('cp -r config/routes/dev config/routes/docker');
+            $process = Process::fromShellCommandline('cp -r config/routes/dev config/routes/docker');
             $process->run();
             if (!$process->isSuccessful()) {
                 $this->logError($process->getErrorOutput());
@@ -87,7 +84,7 @@ class Sf4InitInitHelper extends SfInitHelper
         }
     }
 
-    private function createEnvFile(Shuttle $shuttle)
+    private function createEnvFile(Shuttle $shuttle): void
     {
         if (!file_exists('.env.docker')) {
             $this->logStep('Creating .env.docker file');
@@ -97,12 +94,12 @@ class Sf4InitInitHelper extends SfInitHelper
         }
     }
 
-    private function writeLogDir(array $file)
+    private function writeLogDir(array $file): array
     {
         return $this->writeDir("App\Kernel", "getLogDir", $file,"/tmp/symfony/var/logs/");
     }
 
-    private function writeCacheDir(array $file)
+    private function writeCacheDir(array $file): array
     {
         return $this->writeDir("App\Kernel", "getCacheDir", $file,"/tmp/symfony/var/cache/");
     }

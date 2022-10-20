@@ -7,12 +7,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 trait TwigTrait
 {
-    /**
-     * @var TwigHelper
-     */
-    protected $twig;
+    protected ?TwigHelper $twig = null;
 
-    public function setUpTwig(OutputInterface $output)
+    public function setUpTwig(OutputInterface $output): void
     {
         $this->twig = new TwigHelper($output);
     }

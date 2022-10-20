@@ -7,8 +7,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SslCommand extends AbstractCommand
 {
-
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('ssl')
@@ -16,9 +15,9 @@ class SslCommand extends AbstractCommand
         ;
     }
 
-    protected function doExecute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(InputInterface $input, OutputInterface $output): void
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-        $this->createSSLCerts();
+//        $this->createSSLCerts();
     }
 }
