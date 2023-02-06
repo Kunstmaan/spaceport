@@ -25,7 +25,6 @@ $app->add(new Spaceport\Commands\InitCommand());
 $app->add(new Spaceport\Commands\StartCommand());
 $app->add(new Spaceport\Commands\CopyCommand());
 $app->add(new Spaceport\Commands\StopCommand());
-$app->add(new Spaceport\Commands\SslCommand());
 $app->add(new Spaceport\Commands\CleanCommand());
 
 $app->run();

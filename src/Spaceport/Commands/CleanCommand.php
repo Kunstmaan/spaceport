@@ -20,7 +20,7 @@ class CleanCommand extends AbstractCommand
         ;
     }
 
-    protected function doExecute(InputInterface $input, OutputInterface $output): void
+    protected function doExecute(InputInterface $input, OutputInterface $output): int
     {
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
         $outputString= $this->runCommand('docker container ls -a -f status=exited -f status=created -q', null, [], true);
@@ -56,5 +56,7 @@ class CleanCommand extends AbstractCommand
         }
 
         $this->logSuccess('All gone :)');
+
+        return 0;
     }
 }

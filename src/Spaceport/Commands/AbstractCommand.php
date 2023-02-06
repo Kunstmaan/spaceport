@@ -8,7 +8,6 @@ use Spaceport\Traits\TwigTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Process\Process;
 
 abstract class AbstractCommand extends Command
@@ -21,7 +20,7 @@ abstract class AbstractCommand extends Command
 
     protected Shuttle $shuttle;
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->setUpIO($input, $output);
         $this->setUpTwig($output);
@@ -35,14 +34,14 @@ abstract class AbstractCommand extends Command
         $this->isApacheRunning();
 
         $this->doPreExecute($output);
-        $this->doExecute($input, $output);
+        return $this->doExecute($input, $output);
     }
 
     protected function runCommand($command, $timeout = 180, $env = [], $quiet = false): bool|string
     {
         $this->logCommand($command);
         $env = array_replace($_ENV, $_SERVER, $env);
-        $process = new Process($command, null, $env);
+        $process = Process::fromShellCommandline($command, null, $env);
         $process->setTimeout($timeout);
         $process->run(function ($type, $buffer) {
             if ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
@@ -74,38 +73,6 @@ abstract class AbstractCommand extends Command
         return true;
     }
 
-//    protected function setDinghySSLCerts()
-//    {
-//        $home = getenv("HOME");
-//        if (file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".crt") && file_exists($home . "/.dinghy/certs/" . $this->shuttle->getApacheVhost() . ".key")) {
-//            $this->shuttle->setSslEnabled(true);
-//
-//            return;
-//        }
-//
-//        if ($this->io->confirm('Do you want to enable SSL for your Apache vhost ?', true)) {
-//            $this->createSSLCerts();
-//            $this->shuttle->setSslEnabled(true);
-//        } else {
-//            $this->shuttle->setSslEnabled(false);
-//        }
-//    }
-
-//    protected function createSSLCerts()
-//    {
-//        if (!file_exists(self::DINGHY_CERTS_DIR_PATH)) {
-//            $this->runCommand("mkdir -p " . self::DINGHY_CERTS_DIR_PATH);
-//        }
-//        $sslFilesPath = $this->getSSLFilesPaths();
-//        if ($sslFilesPath) {
-//            foreach (["crt", "key"] as $extension) {
-//                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" cp " . $sslFilesPath[$extension] . " " . self::DINGHY_CERTS_DIR_PATH . "dinghy." . $extension . " 2>/dev/null", null, [], true);
-//                $this->runCommand("sudo -s -p \"Please enter your sudo password:\" ln -sf dinghy." . $extension . " " . self::DINGHY_CERTS_DIR_PATH . $this->shuttle->getApacheVhost() . "." . $extension);
-//            }
-//        }
-//
-//    }
-
     protected function getDockerComposeFileName(): string
     {
         return self::DOCKER_COMPOSE_FILE_NAME;
@@ -129,7 +96,7 @@ abstract class AbstractCommand extends Command
             if (!in_array($file, ['.', '..'])) {
                 $info = stat($path . '/' . $file);
                 $fileUid = $info[4];
-                if ((int) $fileUid !== (int) $uid) {
+                if ((int)$fileUid !== (int)$uid) {
                     $this->logWarning("You are not the filesystem owner of some files/directories in the project.");
                     return false;
                 }
@@ -138,26 +105,6 @@ abstract class AbstractCommand extends Command
 
         return true;
     }
-
-//    private function getSSLFilesPaths()
-//    {
-//        $sslFilesPaths = [];
-//        foreach (["crt", "key"] as $extension) {
-//            $question = new Question("What is the location of the SSL " . $extension . " file ?", self::DINGHY_CERTS_DIR_PATH . "dinghy." . $extension);
-//            $sslFilePath = $this->io->askQuestion($question);
-//            // Replace ~ with the home dir so file_exists works correctly
-//            $sslFilePath = str_replace("~", getenv("HOME"), $sslFilePath);
-//            if (!file_exists($sslFilePath)) {
-//                $this->logError("The path " . $sslFilePath . " does not exist");
-//
-//                exit(1);
-//            } else {
-//                $sslFilesPaths[$extension] = $sslFilePath;
-//            }
-//        }
-//
-//        return $sslFilesPaths;
-//    }
 
     private function checkDockerDaemonIsRunning(): void
     {
